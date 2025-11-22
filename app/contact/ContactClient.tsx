@@ -6,10 +6,17 @@ import { isValidPhoneNumber } from "libphonenumber-js";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 
-const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || `${process.env.NEXT_PUBLIC_STRAPI_URL}`;
+const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || "";
+
+type FormData = {
+  name: string;
+  phone: string;
+  email: string;
+  message: string;
+};
 
 export default function ContactClient({ pageData }: { pageData: any }) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     phone: "",
     email: "",
@@ -29,17 +36,22 @@ export default function ContactClient({ pageData }: { pageData: any }) {
   const banner = pageData.pagebanner;
   const addresses = pageData.Address || [];
 
-  // ✅ Handle input changes
+  // Handle input changes
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  // ✅ Submit form
+  // Submit form
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.phone || !isValidPhoneNumber(formData.phone)) {
       setError("❌ Please enter a valid phone number");
+      return;
+    }
+
+    if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      setError("❌ Please enter a valid email");
       return;
     }
 
@@ -52,20 +64,22 @@ export default function ContactClient({ pageData }: { pageData: any }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-      if (!res.ok) throw new Error("Failed to send message");
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to send message");
 
       setShowPopup(true);
       setFormData({ name: "", phone: "", email: "", message: "" });
-    } catch {
-      alert("❌ Failed to send message. Try again later.");
+    } catch (err: any) {
+      setError(err.message || "❌ Failed to send message. Try again later.");
     } finally {
       setSending(false);
     }
   };
 
-  // ✅ UI
   return (
     <section className="relative bg-[#fdf2df] poppins">
+      {/* Banner */}
       <PageBanner
         title={banner?.title || "Contact Us"}
         image={
@@ -115,8 +129,11 @@ export default function ContactClient({ pageData }: { pageData: any }) {
                   international
                   defaultCountry="IN"
                   value={formData.phone}
-                  onChange={(value) => setFormData({ ...formData, phone: value || "" })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, phone: value || "" })
+                  }
                   className="border p-3 focus:ring-2 focus:ring-gray-500 outline-none w-full"
+                  required
                 />
                 {error && <p className="text-red-600 text-sm">{error}</p>}
                 <input
@@ -140,7 +157,9 @@ export default function ContactClient({ pageData }: { pageData: any }) {
                 <button
                   type="submit"
                   disabled={sending}
-                  className="px-6 py-3 gy-bg text-white font-medium shadow hover:gy-bg transition"
+                  className={`px-6 py-3 gy-bg text-white font-medium shadow hover:gy-bg transition ${
+                    sending ? "cursor-not-allowed opacity-70" : ""
+                  }`}
                 >
                   {sending ? "Sending..." : "Send Message"}
                 </button>
@@ -187,7 +206,7 @@ export default function ContactClient({ pageData }: { pageData: any }) {
         </div>
       </div>
 
-      {/* ✅ Popup */}
+      {/* Popup */}
       {showPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-sm text-center shadow-lg">

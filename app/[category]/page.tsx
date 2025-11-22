@@ -34,6 +34,7 @@ type BannerData = {
   image: string;
 };
 
+
 // ----------------------
 // Fetch API data
 // ----------------------
@@ -41,6 +42,7 @@ async function fetchCategoryData(category: string): Promise<{
   products: CategoryPageItem[];
   banner: BannerData;
 }> {
+  
   const strapiUrl =
     process.env.NEXT_PUBLIC_STRAPI_URL ||
     `${process.env.NEXT_PUBLIC_STRAPI_URL}`;
@@ -198,12 +200,16 @@ export default async function CategoryPage({
                 </h2>
 
                 <div className="text-gray-700 leading-relaxed">
-                  {page.description?.map((para, i) => (
-                    <p key={i} className="block mb-2">
-                      {para}
-                    </p>
+                  {page.description?.map((block, i) => (
+                    <div
+                      key={i}
+                      className="mb-3"
+                      dangerouslySetInnerHTML={{ __html: block }}
+                    />
                   ))}
                 </div>
+
+
 
                 {page.applications?.length ? (
                   <div className="mt-4">
