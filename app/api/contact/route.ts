@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { parsePhoneNumber } from "libphonenumber-js";
 
 export const runtime = "nodejs"; // stay on Node runtime
 
@@ -53,10 +53,11 @@ export async function POST(req: Request) {
     }
 
     // Validate phone number
-    const phoneNumber = parsePhoneNumberFromString(body.phone);
-    if (!phoneNumber || !phoneNumber.isValid()) {
+    const phoneNumber = parsePhoneNumber(body.phone || "");
+    if (!phoneNumber?.isValid()) {
       return NextResponse.json({ ok: false, error: "Invalid phone number" }, { status: 400 });
     }
+
 
     const data: Body = {
       name: body.name.trim(),

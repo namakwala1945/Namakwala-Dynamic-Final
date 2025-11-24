@@ -2,7 +2,7 @@
 import { useState } from "react";
 import PageBanner from "@/components/PageBanner";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
-import { isValidPhoneNumber } from "libphonenumber-js";
+import { isValidPhoneNumber, parsePhoneNumberFromString, AsYouType  } from "libphonenumber-js";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 
@@ -129,12 +129,12 @@ export default function ContactClient({ pageData }: { pageData: any }) {
                   international
                   defaultCountry="IN"
                   value={formData.phone}
-                  onChange={(value) =>
-                    setFormData({ ...formData, phone: value || "" })
-                  }
+                  onChange={(value) => setFormData({ ...formData, phone: value || "" })}
+
                   className="border p-3 focus:ring-2 focus:ring-gray-500 outline-none w-full"
                   required
                 />
+
                 {error && <p className="text-red-600 text-sm">{error}</p>}
                 <input
                   type="email"
