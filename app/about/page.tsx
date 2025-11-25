@@ -7,7 +7,7 @@ import AboutContent from "./AboutContent";
 // ----------------------
 async function getAboutUsData() {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/about-us?populate[Metadata][populate]=*&populate[pagebanner][populate]=*&populate[OurJourney][populate]=*&populate[KeyMilestonesOptions][populate]=*&populate[CommonSection][populate]=*`,
+    `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/about-us?populate[Metadata][populate]=*&populate[pagebanner][populate]=*&populate[OurJourney][populate]=*&populate[KnowAboutUs][populate]=*&populate[KeyMilestonesOptions][populate]=*&populate[CommonSection][populate]=*`,
     { cache: "no-store" }
   );
   if (!res.ok) throw new Error("Failed to fetch About Us data");

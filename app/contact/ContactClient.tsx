@@ -8,6 +8,7 @@ import "react-phone-number-input/style.css";
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || "";
 
+
 type FormData = {
   name: string;
   phone: string;
