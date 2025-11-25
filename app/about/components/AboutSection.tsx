@@ -109,13 +109,7 @@ export default function AboutSection({ section }: SectionProps) {
             </div>
           );
         })()
-      ) : (
-        // Nested Sections (Milestones, Vision, Leadership, Founder’s Legacy)
-        <>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 text-gray-800">{section.title}</h2>
-          <p className="text-gray-700 leading-relaxed whitespace-pre-line">{section.content}</p>
-        </>
-      )}
+      ) : null}
 
       {/* Nested Sections */}
       {section.sections && (
