@@ -64,7 +64,7 @@ export default function AboutSection({ section }: SectionProps) {
       ) : section.image ? (
         // KnowAboutUs Sections with alternating layout + overlay
         (() => {
-          const isEven = !isReversed; // Determine layout dynamically
+          const isEven = isReversed; // Determine layout dynamically
           return (
             <div
               className={`relative flex flex-col md:flex-row items-center md:items-start md:gap-12 animate-fadeIn ${
@@ -93,7 +93,7 @@ export default function AboutSection({ section }: SectionProps) {
 
               {/* Image */}
               <div
-                className={`md:w-1/2 mt-8 md:mt-0 relative md:-top-8 overflow-hidden shadow-2xl flex-shrink-0 hover:scale-105 transition-transform duration-500 ${
+                className={`w-full md:w-1/2 mt-6 md:mt-0 relative md:-top-8 md:-ml-8 lg:-ml-16 overflow-hidden shadow-2xl flex-shrink-0 hover:scale-105 transition-transform duration-500 h-64 sm:h-80 md:h-[350px] lg:h-[380px] ${
                   isEven ? "md:-ml-16" : "md:-mr-16"
                 }`}
                 style={{ minHeight: "320px" }}
@@ -113,7 +113,7 @@ export default function AboutSection({ section }: SectionProps) {
 
       {/* Nested Sections */}
       {section.sections && (
-        <div className="mt-12 py-8 sm:py-12 space-y-12 sm:space-y-16 justify-start">
+        <div className="py-8 sm:py-12 space-y-12 sm:space-y-16 justify-start">
           {/* Milestones */}
           {"milestones" in section.sections && (
             <div
