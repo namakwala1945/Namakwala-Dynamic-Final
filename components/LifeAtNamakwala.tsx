@@ -95,11 +95,11 @@ export default function LifeAtNamakwala() {
 
           {/* RIGHT CONTENT */}
           <div className="text-gray-700 space-y-2 sm:space-y-4 text-center lg:text-left mt-4 lg:mt-0">
-            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl playfair font-bold">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl playfair font-bold text-gradient">
               {data.title}
             </h1>
 
-            <p className="text-xs sm:text-sm md:text-base lg:text-lg text-justify whitespace-pre-line">
+            <p className="text-muted-foreground mb-8 text-sm sm:text-base leading-relaxed">
               {data.description}
             </p>
           </div>
