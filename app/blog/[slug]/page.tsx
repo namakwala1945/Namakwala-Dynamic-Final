@@ -27,7 +27,7 @@ async function getBlogData(slug: string) {
 async function getAllBlogs() {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/blogs?populate[pagebanner][populate]=*&populate[PageSchema][populate]=*`,
+      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/blogs?populate[pagebanner][populate]=*`,
       { next: { revalidate: 60 } }
     );
     const { data } = await res.json();
@@ -137,7 +137,7 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
         <div className="container bg-white mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* LEFT SIDE – Blog Content */}
           <div className="lg:col-span-8">
-            <h1 className="text-4xl mb-4 playfair text-gradient font-extrabold leading-[43px]">{blog.title}</h1>
+            <h1 className="text-4xl mb-4 playfair text-gradient font-extrabold">{blog.title}</h1>
             <hr className="mb-4"></hr>
             {/* BLOG BODY */}
             <div className="prose prose-lg max-w-full text-justify prose-p:text-justify">
@@ -179,7 +179,7 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
 
           {/* RIGHT SIDE – Professional Blog List */}
           <div className="lg:col-span-4">
-            <h2 className="text-4xl mb-4 playfair text-gradient font-extrabold leading-[43px]">
+            <h2 className="text-4xl mb-4 playfair text-gradient font-extrabold">
               Latest Blogs
             </h2>
             <hr className="mb-4"></hr>
