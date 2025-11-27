@@ -42,7 +42,7 @@ interface LegalNotice {
 async function getLegalNoticeData(): Promise<LegalNotice | null> {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/legal-notice?populate[Metadata][populate]=*&populate[pagebanner][populate]=*&populate[CommonSection][populate]=*`,
+      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/legal-notice?populate[Metadata][populate]=*&populate[PageSchema][populate]=*&populate[pagebanner][populate]=*&populate[CommonSection][populate]=*`,
       { cache: "no-store" } // ⚡ Faster fresh fetch
     );
 

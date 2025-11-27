@@ -8,7 +8,7 @@ const STRAPI_URL =
 // ---- Fetch Contact Data ----
 async function fetchContactData() {
   const res = await fetch(
-    `${STRAPI_URL}/api/contact?populate[Metadata][populate]=*&populate[pagebanner][populate]=*&populate[Address][populate]=*`,
+    `${STRAPI_URL}/api/contact?populate[Metadata][populate]=*&populate[PageSchema][populate]=*&populate[pagebanner][populate]=*&populate[Address][populate]=*`,
     { cache: "no-store" }
   );
 

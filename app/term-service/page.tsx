@@ -5,7 +5,7 @@ import PageBanner from "@/components/PageBanner";
 import Image from "next/image";
 import Script from "next/script";
 
-const API_URL = `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/terms-of-service?populate[Metadata][populate]=*&populate[pagebanner][populate]=*&populate[CommonSection][populate]=*`;
+const API_URL = `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/terms-of-service?populate[Metadata][populate]=*&populate[PageSchema][populate]=*&populate[pagebanner][populate]=*&populate[CommonSection][populate]=*`;
 
 // ----------------------
 // Types

@@ -5,6 +5,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import ClientComponents from "./ClientComponents";
 import { Playfair_Display, Poppins } from "next/font/google";
+import PageSchemaScript from "@/components/PageSchemaScript";
 
 // Fonts
 const playfair = Playfair_Display({
@@ -36,6 +37,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           name="viewport"
           content="width=device-width, initial-scale=1, viewport-fit=cover"
         />
+        <PageSchemaScript schema={{
+          Name: "Namakwala",
+          RatingValue: 4.8,
+          RatingCount: 28916,
+          ReviewCount: 50
+        }} />
       </head>
 
       <body

@@ -37,7 +37,7 @@ interface PageData {
 async function getPrivacyPolicyData() {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/privacy-policy?populate[Metadata][populate]=*&populate[pagebanner][populate]=*&populate[CommonSection][populate]=*`,
+      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/privacy-policy?populate[Metadata][populate]=*&populate[PageSchema][populate]=*&populate[pagebanner][populate]=*&populate[CommonSection][populate]=*`,
       { next: { revalidate: 60 } }
     );
 

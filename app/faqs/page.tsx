@@ -10,7 +10,7 @@ import { FiChevronDown } from "react-icons/fi";
 async function getFaqData() {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/faq?populate[Metadata][populate]=*&populate[pagebanner][populate]=*&populate[faqs][populate]=*`,
+      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/faq?populate[Metadata][populate]=*&populate[PageSchema][populate]=*&populate[pagebanner][populate]=*&populate[faqs][populate]=*`,
       { next: { revalidate: 60 } } // ISR caching
     );
 

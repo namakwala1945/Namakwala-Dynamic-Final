@@ -49,7 +49,7 @@ async function fetchCategoryData(category: string): Promise<{
 
   try {
     const productsRes = await fetch(
-      `${strapiUrl}/api/products?filters[category][$eq]=${category}&populate=*`,
+      `${strapiUrl}/api/products?filters[category][$eq]=${category}&populate=*&populate[PageSchema][populate]=*`,
       { cache: "no-store" }
     );
 

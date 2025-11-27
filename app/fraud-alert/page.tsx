@@ -47,7 +47,7 @@ interface FraudAlert {
 async function getFraudAlertData(): Promise<FraudAlert | null> {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/fraud-alert?populate[Metadata][populate]=*&populate[pagebanner][populate]=*&populate[CommonSection][populate]=*`,
+      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/fraud-alert?populate[Metadata][populate]=*&populate[PageSchema][populate]=*&populate[pagebanner][populate]=*&populate[CommonSection][populate]=*`,
       { cache: "no-store" } // ⚡ always fresh
     );
 

@@ -8,7 +8,7 @@ const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || `${process.env.NEXT_PUBL
 // ------------------------------
 async function getCatalogueData() {
   const res = await fetch(
-    `${strapiUrl}/api/catalogue?populate[Metadata][populate]=*&populate[pagebanner][populate]=*&populate[catalogue][populate]=*`,
+    `${strapiUrl}/api/catalogue?populate[Metadata][populate]=*&populate[PageSchema][populate]=*&populate[pagebanner][populate]=*&populate[catalogue][populate]=*`,
     {
       cache: "no-store",
     }
