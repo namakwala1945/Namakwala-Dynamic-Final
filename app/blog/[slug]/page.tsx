@@ -80,7 +80,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       description:
         (meta.openGraph?.description &&
           meta.openGraph?.description[0]?.children?.[0]?.text) || "",
-      url: meta.openGraph?.url || `https://www.namakwala.in/blog/${blog.slug}`,
+      url: meta.openGraph?.url || `${process.env.NEXT_PUBLIC_STRAPI_URL}/blog/${blog.slug}`,
       images: [
         blog.pagebanner?.image?.url
           ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${blog.pagebanner.image.url}`

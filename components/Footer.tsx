@@ -46,7 +46,7 @@ const iconMap: any = {
 // API Fetcher
 async function getSocialMedia() {
   try {
-    const res = await fetch("http://localhost:1337/api/social-medias?populate=*", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/social-medias?populate=*`, {
       cache: "no-store",
     });
 
