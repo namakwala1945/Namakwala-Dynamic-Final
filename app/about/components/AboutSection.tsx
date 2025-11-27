@@ -76,7 +76,7 @@ export default function AboutSection({ section }: SectionProps) {
                 className="md:w-1/2 bg-white p-8 md:p-12 shadow-2xl z-10 relative hover:scale-105 transition-transform duration-300 -mt-24 md:-mt-0"
                 style={{ minHeight: "320px" }}
               >
-                <h2 className="text-2xl md:text-3xl font-bold mb-4 text-gray-800 playfair text-gradient">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-gray-800 animate-slideUp playfair text-gradient leading-snug md:leading-[1.5]">
                   {section.title}
                 </h2>
 
