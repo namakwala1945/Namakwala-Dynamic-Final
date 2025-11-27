@@ -98,7 +98,7 @@ export default async function BlogPage() {
               const imgUrl = getStrapiMedia(post.pagebanner?.image?.url);
               return (
                 // ✅ Link directly to root-level slug
-                <Link key={post.documentId} href={`/${post.slug}`}>
+                <Link key={post.documentId} href={`/${post.slug}.html`}>
                   <div className="group cursor-pointer">
                     <div className="relative overflow-hidden rounded-2xl shadow-md">
                       <Image

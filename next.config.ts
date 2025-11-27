@@ -41,9 +41,21 @@ const nextConfig: NextConfig = {
 
   async rewrites() {
     return [
+      // 1️⃣ Serve old .html blog URLs at root
       {
         source: "/:slug.html",
-        destination: "/blog/:slug.html",
+        destination: "/blog/:slug",
+      },
+    ];
+  },
+
+  async redirects() {
+    return [
+      // 2️⃣ Optional: Redirect /blog/:slug to /:slug.html for SEO
+      {
+        source: "/blog/:slug",
+        destination: "/:slug.html",
+        permanent: true,
       },
     ];
   },
