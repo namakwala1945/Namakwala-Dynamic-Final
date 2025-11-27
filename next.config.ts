@@ -6,26 +6,34 @@ module.exports = {
   },
 
   images: {
-    unoptimized: false, // ❗ enable Next.js image optimization
+    unoptimized: false, // ✅ enable Next.js image optimization
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 60,
     deviceSizes: [320, 640, 768, 1024, 1200, 1600],
 
-    // existing image domains
+    // Existing image domains
     domains: ["images.unsplash.com", "img.youtube.com"],
 
-    // existing pattern + Strapi added here
+    // Remote patterns for optimized external images
     remotePatterns: [
       { protocol: "https", hostname: "picsum.photos" },
       { protocol: "https", hostname: "upload.wikimedia.org" },
       { protocol: "https", hostname: "apeda.gov.in" },
 
-      // ✅ ADD STRAPI DOMAIN FOR OPTIMIZED IMAGES
+      // ✅ Strapi host for uploads
       {
         protocol: "https",
         hostname: "admin.namakwala.in",
         port: "",
-        pathname: "/uploads/**",
+        pathname: "/uploads/**", // allow all images under /uploads
+      },
+
+      // Optional: allow optimized fallback images
+      {
+        protocol: "https",
+        hostname: "admin.namakwala.in",
+        port: "",
+        pathname: "/optimized/**", // allow /optimized folder
       },
     ],
   },

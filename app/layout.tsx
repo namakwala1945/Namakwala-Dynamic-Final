@@ -3,7 +3,7 @@ import Footer from "@/components/Footer";
 import { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
-import ClientComponents from "./ClientComponents"; // client-only wrapper
+import ClientComponents from "./ClientComponents";
 import { Playfair_Display, Poppins } from "next/font/google";
 
 // Fonts
@@ -20,7 +20,7 @@ const poppins = Poppins({
   display: "swap",
 });
 
-// ✅ Server-side metadata
+// Metadata
 export const metadata: Metadata = {
   title:
     "Best Salt's Exporter in India | Best Mineral's Exporter in India | NAMAKWALA",
@@ -37,10 +37,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           content="width=device-width, initial-scale=1, viewport-fit=cover"
         />
       </head>
+
       <body
         className={`${poppins.variable} ${playfair.variable} font-poppins font-playfair cursor-none`}
       >
-        <ClientComponents /> {/* client-only features */}
+        <ClientComponents />
         <Header />
         <Providers>{children}</Providers>
         <Footer />

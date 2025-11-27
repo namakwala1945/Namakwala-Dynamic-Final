@@ -2,13 +2,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import PageBanner from "@/components/PageBanner";
-import { getStrapiMedia } from "@/lib/media";   // ✅ ADDED
+import { getStrapiMedia } from "@/lib/media";
 import { Metadata as NextMetadata } from "next";
 import { notFound } from "next/navigation";
 
-// ------------------------------------------------------
-// ✅ Fetch Blog Page Data
-// ------------------------------------------------------
+// Fetch Blog Page Data
 async function getBlogPageData() {
   try {
     const res = await fetch(
@@ -24,9 +22,7 @@ async function getBlogPageData() {
   }
 }
 
-// ------------------------------------------------------
-// ✅ Fetch All Blogs
-// ------------------------------------------------------
+// Fetch All Blogs
 async function getBlogsData() {
   try {
     const res = await fetch(
@@ -42,9 +38,7 @@ async function getBlogsData() {
   }
 }
 
-// ------------------------------------------------------
-// ✅ Metadata with getStrapiMedia()
-// ------------------------------------------------------
+// Metadata
 export async function generateMetadata(): Promise<NextMetadata> {
   const data = await getBlogPageData();
   if (!data) return {};
@@ -57,7 +51,6 @@ export async function generateMetadata(): Promise<NextMetadata> {
       (meta.description && meta.description[0]?.children?.[0]?.text) ||
       "Read our latest blogs on salt and minerals.",
     keywords: meta.keywords,
-
     openGraph: {
       title: meta.openGraph?.title,
       description:
@@ -68,7 +61,6 @@ export async function generateMetadata(): Promise<NextMetadata> {
         getStrapiMedia(meta.metaImage?.url) || "/default-og-image.jpg",
       ],
     },
-
     twitter: {
       card: meta.twitter?.card || "summary_large_image",
       title: meta.twitter?.title,
@@ -78,9 +70,7 @@ export async function generateMetadata(): Promise<NextMetadata> {
   };
 }
 
-// ------------------------------------------------------
-// ✅ Blog Page Component (with getStrapiMedia everywhere)
-// ------------------------------------------------------
+// Blog Listing Component
 export default async function BlogPage() {
   const blogPage = await getBlogPageData();
   const blogs = await getBlogsData();
@@ -91,14 +81,12 @@ export default async function BlogPage() {
 
   return (
     <section className="relative poppins">
-      {/* Top Banner */}
       <PageBanner
         title={banner?.title || "Blog"}
-        image={getStrapiMedia(banner?.image?.url) || "/optimized/fallback-image.jpg"}  // ✅ FIXED
+        image={getStrapiMedia(banner?.image?.url) || "/optimized/fallback-image.jpg"}
         category={banner?.heading || "Blog"}
       />
 
-      {/* Blog List */}
       <div className="container mx-auto px-6 py-16">
         <h1 className="text-4xl md:text-5xl playfair font-bold text-center mb-8">
           {blogPage.title || "Our Blog"}
@@ -108,27 +96,24 @@ export default async function BlogPage() {
           {blogs.length > 0 ? (
             blogs.map((post: any) => {
               const imgUrl = getStrapiMedia(post.pagebanner?.image?.url);
-
               return (
-                <Link key={post.documentId} href={`/blog/${post.slug}`}>
+                // ✅ Link directly to root-level slug
+                <Link key={post.documentId} href={`/${post.slug}`}>
                   <div className="group cursor-pointer">
                     <div className="relative overflow-hidden rounded-2xl shadow-md">
                       <Image
-                        src={imgUrl || "/optimized/fallback-image.jpg"}   // ✅ FIXED
+                        src={imgUrl || "/optimized/fallback-image.jpg"}
                         alt={post.title}
                         width={800}
                         height={500}
                         className="object-cover w-full h-64 transition-transform duration-500 group-hover:scale-110"
                       />
                     </div>
-
                     <div className="mt-4">
                       <h2 className="text-2xl font-semibold text-gray-900 group-hover:text-orange-500 transition-colors">
                         {post.title}
                       </h2>
-
                       <p className="text-gray-700 mt-2">{post.Excerpt}</p>
-
                       <p className="text-sm text-gray-500 mt-1">
                         By {post.AuthorName} |{" "}
                         {new Date(post.PublishedDate).toLocaleDateString()}
@@ -139,9 +124,7 @@ export default async function BlogPage() {
               );
             })
           ) : (
-            <p className="text-center text-gray-600 col-span-full">
-              No blogs found.
-            </p>
+            <p className="text-center text-gray-600 col-span-full">No blogs found.</p>
           )}
         </div>
       </div>

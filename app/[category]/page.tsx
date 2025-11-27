@@ -42,7 +42,7 @@ async function fetchCategoryData(category: string): Promise<{
   products: CategoryPageItem[];
   banner: BannerData;
 }> {
-  
+
   const strapiUrl =
     process.env.NEXT_PUBLIC_STRAPI_URL ||
     `${process.env.NEXT_PUBLIC_STRAPI_URL}`;

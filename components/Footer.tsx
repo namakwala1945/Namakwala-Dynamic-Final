@@ -5,12 +5,14 @@ import Image from "next/image";
 import Link from "next/link";
 import VisitorCounter from "./VisitorCount";
 
+// Fetch footer links from menu JSON
 function getFooterLinks() {
   return Object.values(headerMenu).filter(
     (menu: any) => menu.name === "About" || menu.name === "Businesses"
   );
 }
 
+// Static sections
 const footerSections = [
   {
     title: "Important",
@@ -32,20 +34,42 @@ const footerSections = [
   },
 ];
 
-const socialLinks = [
-  { name: "LinkedIn", icon: Linkedin, href: "https://linkedin.com/" },
-  { name: "Twitter", icon: Twitter, href: "https://twitter.com/" },
-  { name: "Facebook", icon: Facebook, href: "https://facebook.com/" },
-  { name: "Instagram", icon: Instagram, href: "https://instagram.com/" },
-  { name: "YouTube", icon: Youtube, href: "https://youtube.com/" },
-];
+// Icon Mapper
+const iconMap: any = {
+  Linkedin: Linkedin,
+  Twitter: Twitter,
+  Facebook: Facebook,
+  Instagram: Instagram,
+  YouTube: Youtube,
+};
 
-export default function Footer() {
+// API Fetcher
+async function getSocialMedia() {
+  try {
+    const res = await fetch("http://localhost:1337/api/social-medias?populate=*", {
+      cache: "no-store",
+    });
+
+    if (!res.ok) throw new Error("API Error");
+
+    const json = await res.json();
+    return json.data?.[0]?.SocialLink || [];
+  } catch (error) {
+    console.error("Social API failed:", error);
+    return [];
+  }
+}
+
+// MAIN FOOTER
+export default async function Footer() {
   const footerMenus = getFooterLinks();
+  const socialLinks = await getSocialMedia(); // fetch API
+
   return (
     <footer className="relative border-t border-border poppins overflow-hidden">
       {/* Main Footer Content */}
       <div className="w-auto relative mx-auto px-4 md:px-8 lg:px-12 py-16 overflow-hidden">
+
         {/* Background Image */}
         <div className="absolute inset-0 -z-10 opacity-40">
           <Image
@@ -61,6 +85,7 @@ export default function Footer() {
 
         {/* Footer Sections */}
         <div className="grid md:grid-cols-4 gap-8 relative">
+
           {/* About */}
           {footerMenus
             .filter((menu: any) => menu.name === "About")
@@ -154,28 +179,33 @@ export default function Footer() {
             ))}
         </div>
 
-        {/* Social Links */}
+        {/* Dynamic Social Links */}
         <div className="mt-12 text-center">
           <span className="text-lg font-semibold mb-4">Follow Us</span>
+
           <div className="flex justify-center space-x-6">
-            {socialLinks.map((link, idx) => {
-              const Icon = link.icon;
-              return (
-                <a
-                  key={idx}
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={link.name}
-                >
-                  <Icon className="w-6 h-6 text-gray-600 hover:text-primary transition-colors" />
-                </a>
-              );
-            })}
+
+            {socialLinks
+              .filter((item: any) => item?.SocialLink) // ⬅️ Hide if no link available
+              .map((item: any, idx: number) => {
+                const Icon = iconMap[item.SocialName] || Globe;
+
+                return (
+                  <a
+                    key={idx}
+                    href={item.SocialLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={item.SocialName}
+                  >
+                    <Icon className="w-6 h-6 text-gray-600 hover:text-primary transition-colors" />
+                  </a>
+                );
+              })}
           </div>
         </div>
       </div>
-      <VisitorCounter/>
+      <VisitorCounter />
       {/* Bottom Bar */}
       <div className="border-t border-border bg-muted/50">
         <div className="container mx-auto px-4 md:px-8 lg:px-12 py-6">
@@ -183,6 +213,7 @@ export default function Footer() {
             <div className="text-sm text-muted-foreground">
               © {new Date().getFullYear()} NAMAKWALA. All rights reserved.
             </div>
+
             <div className="flex items-center gap-6 text-sm">
               <a href="/privacy-policy" className="text-muted-foreground hover:text-primary transition-colors">
                 Privacy Policy
@@ -193,6 +224,7 @@ export default function Footer() {
               <a href="/export-terms" className="text-muted-foreground hover:text-primary transition-colors">
                 Export Terms
               </a>
+
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Globe className="w-4 h-4" />
                 <span>Made in India</span>
@@ -202,6 +234,7 @@ export default function Footer() {
           </div>
         </div>
       </div>
+
     </footer>
   );
 }

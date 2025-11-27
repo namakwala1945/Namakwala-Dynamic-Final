@@ -1,4 +1,3 @@
-// app/blog/[slug]/page.tsx
 import PageBanner from "@/components/PageBanner";
 import { notFound } from "next/navigation";
 import { Metadata as NextMetadata } from "next";
@@ -41,15 +40,14 @@ export async function generateStaticParams() {
 // ----------------------
 // ✅ Metadata
 // ----------------------
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string };
-}): Promise<NextMetadata> {
-  const blog = await getBlogData(params.slug);
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  const { slug } = await params;       // ⬅ IMPORTANT FIX
+
+  const blog = await getBlogData(slug);
   if (!blog) return {};
 
   const meta = blog.Metadata || {};
+
   return {
     title: meta.title || blog.title,
     description:
@@ -58,8 +56,7 @@ export async function generateMetadata({
       title: meta.openGraph?.title || blog.title,
       description:
         (meta.openGraph?.description &&
-          meta.openGraph?.description[0]?.children?.[0]?.text) ||
-        "",
+          meta.openGraph?.description[0]?.children?.[0]?.text) || "",
       url: meta.openGraph?.url || `https://www.namakwala.in/blog/${blog.slug}`,
       images: [
         blog.pagebanner?.image?.url
@@ -72,8 +69,7 @@ export async function generateMetadata({
       title: meta.twitter?.title || blog.title,
       description:
         (meta.twitter?.description &&
-          meta.twitter?.description[0]?.children?.[0]?.text) ||
-        "",
+          meta.twitter?.description[0]?.children?.[0]?.text) || "",
     },
   };
 }
@@ -81,19 +77,16 @@ export async function generateMetadata({
 // ----------------------
 // ✅ Single Blog Component
 // ----------------------
-export default async function BlogDetailPage({
-  params,
-}: {
-  params: { slug: string };
-}) {
-  const blog = await getBlogData(params.slug);
+export default async function BlogDetailPage({ params }: { params: { slug: string } }) {
+  const { slug } = await params;      // ⬅ FIX HERE
+
+  const blog = await getBlogData(slug);
   if (!blog) return notFound();
 
   const banner = blog.pagebanner;
 
   return (
     <section className="relative poppins">
-      {/* ✅ Banner */}
       <PageBanner
         title={banner?.title || blog.title}
         image={
@@ -104,14 +97,12 @@ export default async function BlogDetailPage({
         category="Blog"
       />
 
-      {/* ✅ Blog Content */}
       <div className="container mx-auto px-6 py-16 max-w-3xl prose prose-lg">
         <div className="mb-6 text-gray-600 text-sm">
           By <span className="font-semibold">{blog.AuthorName}</span> •{" "}
           {new Date(blog.PublishedDate).toLocaleDateString()}
         </div>
 
-        {/* Render rich text content */}
         {blog.content?.map((block: any, i: number) => (
           <p key={i}>{block.children?.[0]?.text}</p>
         ))}
@@ -119,3 +110,10 @@ export default async function BlogDetailPage({
     </section>
   );
 }
+
+
+
+
+
+
+
