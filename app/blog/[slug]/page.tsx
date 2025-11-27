@@ -138,20 +138,19 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
           {/* LEFT SIDE – Blog Content */}
           <div className="lg:col-span-8">
             <h1 className="text-4xl mb-4 playfair text-gradient font-extrabold">{blog.title}</h1>
-            <div className="mb-4 text-gray-600 text-sm">
-              By <span className="font-semibold">{blog.AuthorName}</span> •{" "}
-              {new Date(blog.PublishedDate).toLocaleDateString()}
-            </div>
             <hr className="mb-4"></hr>
             {/* BLOG BODY */}
-            <div className="prose prose-lg max-w-full">
+            <div className="prose prose-lg max-w-full text-justify prose-p:text-justify">
               {blog.content?.map((block: any, i: number) => (
                 <p key={i}>{block.children?.[0]?.text}</p>
               ))}
             </div>
-
+            <div className="mt-4 text-gray-600 text-sm text-right">
+              By <span className="text-gradient font-extrabold">{blog.AuthorName}</span> •{" "}
+              {new Date(blog.PublishedDate).toLocaleDateString()}
+            </div>
             {/* NEXT / PREVIOUS LINKS */}
-            <div className="flex justify-between mt-12 border-t pt-6 text-sm">
+            <div className="flex justify-between mt-6 border-t pt-6 text-sm">
 
               {prevBlog ? (
                 <a
@@ -180,10 +179,10 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
 
           {/* RIGHT SIDE – Professional Blog List */}
           <div className="lg:col-span-4">
-            <h2 className="text-3xl playfair text-gradient font-extrabold mb-4 text-gray-900 border-b pb-3">
+            <h2 className="text-4xl mb-4 playfair text-gradient font-extrabold">
               Latest Blogs
             </h2>
-
+            <hr className="mb-4"></hr>
             <div className="">
               {blogs.slice(0, 6).map((post: any) => {
                 const imgUrl = getStrapiMedia(
@@ -214,7 +213,9 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
                       <h3 className="text-gray-800 playfair text-gradient font-extrabold hover:text-orange-600 transition">
                         {post.title}
                       </h3>
-
+                      <p className="text-[13px] text-gray-500 mt-1 line-clamp-1 leading-tight">
+                        {post.Excerpt || post.short_description || ""}
+                      </p>
                       <p className="text-[12px] text-gray-500 mt-1">
                         {new Date(post.PublishedDate).toLocaleDateString()}
                       </p>
