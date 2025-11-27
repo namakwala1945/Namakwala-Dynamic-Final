@@ -156,7 +156,7 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
               {prevBlog ? (
                 <a
                   href={`/${prevBlog.slug}.html`}
-                  className="text-gray-600 hover:text-orange-600 hover:underline"
+                  className="text-gray-600 hover:text-gradient hover:underline hover:font-extrabold"
                 >
                   ← {prevBlog.title}
                 </a>
@@ -167,7 +167,7 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
               {nextBlog ? (
                 <a
                   href={`/${nextBlog.slug}.html`}
-                  className="text-gray-600 hover:text-orange-600 hover:underline"
+                  className="text-gray-600 hover:text-gradient hover:underline hover:font-extrabold"
                 >
                 {nextBlog.title} →
                 </a>
@@ -180,7 +180,7 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
 
           {/* RIGHT SIDE – Professional Blog List */}
           <div className="lg:col-span-4">
-            <h2 className="text-3xl font-bold mb-6 text-gray-900 border-b pb-3">
+            <h2 className="text-3xl playfair text-gradient font-extrabold mb-4 text-gray-900 border-b pb-3">
               Latest Blogs
             </h2>
 
@@ -211,7 +211,7 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
 
                     {/* Text */}
                     <div className="flex-1">
-                      <h3 className="text-gray-800 text-gradient font-extrabold hover:text-orange-600 transition">
+                      <h3 className="text-gray-800 playfair text-gradient font-extrabold hover:text-orange-600 transition">
                         {post.title}
                       </h3>
 
