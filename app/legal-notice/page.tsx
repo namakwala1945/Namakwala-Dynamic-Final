@@ -1,9 +1,10 @@
 // app/legal-notice/page.tsx
+
 import PageBanner from "@/components/PageBanner";
 import Image from "next/image";
-import Script from "next/script";
 import { notFound } from "next/navigation";
-import { getStrapiMedia } from "@/lib/media"; // ✅ Added helper
+import { getStrapiMedia } from "@/lib/media";
+import PageSchemaScript from "@/components/PageSchemaScript"; // ✅ Added
 
 // ----------------------
 // Types
@@ -34,6 +35,12 @@ interface LegalNotice {
   banner: PageBannerData;
   sections: CommonSection[];
   metadata: MetadataType;
+  PageSchema?: {
+    Name: string;
+    RatingValue: number;
+    RatingCount: number;
+    ReviewCount: number;
+  };
 }
 
 // ----------------------
@@ -43,7 +50,7 @@ async function getLegalNoticeData(): Promise<LegalNotice | null> {
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/legal-notice?populate[Metadata][populate]=*&populate[PageSchema][populate]=*&populate[pagebanner][populate]=*&populate[CommonSection][populate]=*`,
-      { cache: "no-store" } // ⚡ Faster fresh fetch
+      { cache: "no-store" }
     );
 
     if (!res.ok) throw new Error("Failed to fetch Legal Notice data");
@@ -57,7 +64,7 @@ async function getLegalNoticeData(): Promise<LegalNotice | null> {
       banner: {
         title: data.pagebanner?.title || "",
         heading: data.pagebanner?.heading || "",
-        image: getStrapiMedia(data.pagebanner?.image?.url || null) || undefined, // ✅ safe
+        image: getStrapiMedia(data.pagebanner?.image?.url || null) || undefined,
       },
 
       sections:
@@ -67,17 +74,25 @@ async function getLegalNoticeData(): Promise<LegalNotice | null> {
             section.description
               ?.map((d: any) => d.children?.map((c: any) => c.text).join(" "))
               .join("\n") || "",
-          image: getStrapiMedia(section.image?.url || null) || undefined, // ✅ safe URL
+          image: getStrapiMedia(section.image?.url || null) || undefined,
         })) || [],
 
       metadata: data.Metadata || {},
-    };
 
-    // Debug
-    console.log("🖼 Banner Image:", legalNotice.banner.image);
-    legalNotice.sections.forEach((s, i) =>
-      console.log(`🖼 Section ${i + 1}:`, s.image)
-    );
+      PageSchema: data.PageSchema
+        ? {
+            Name: data.PageSchema.Name || "Legal Notice",
+            RatingValue: data.PageSchema.RatingValue ?? 0,
+            RatingCount: data.PageSchema.RatingCount ?? 0,
+            ReviewCount: data.PageSchema.ReviewCount ?? 0,
+          }
+        : {
+            Name: "Legal Notice",
+            RatingValue: 0,
+            RatingCount: 0,
+            ReviewCount: 0,
+          },
+    };
 
     return legalNotice;
   } catch (error) {
@@ -91,35 +106,14 @@ async function getLegalNoticeData(): Promise<LegalNotice | null> {
 // ----------------------
 export default async function LegalNoticePage() {
   const page = await getLegalNoticeData();
-
   if (!page) return notFound();
 
   return (
     <section className="relative bg-gray-100 poppins">
-      {/* ✅ Structured Data */}
-      <Script type="application/ld+json" id="legalnotice-schema">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "WebPage",
-          name: page.title,
-          description: page.description,
-          url: page.metadata?.openGraph?.url || "https://www.namakwala.in/legal-notice",
-        })}
-      </Script>
+      {/* ✅ Page Schema */}
+      <PageSchemaScript schema={page.PageSchema} />
 
-      {/* ✅ Breadcrumb JSON-LD */}
-      <Script type="application/ld+json" id="breadcrumb-schema">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "BreadcrumbList",
-          itemListElement: [
-            { "@type": "ListItem", position: 1, name: "Home", item: "https://www.namakwala.in/" },
-            { "@type": "ListItem", position: 2, name: "Legal Notice", item: "https://www.namakwala.in/legal-notice" },
-          ],
-        })}
-      </Script>
-
-      {/* ✅ Banner */}
+      {/* Banner */}
       <PageBanner
         title={page.banner.title}
         image={page.banner.image || "/optimized/fallback-image.jpg"}

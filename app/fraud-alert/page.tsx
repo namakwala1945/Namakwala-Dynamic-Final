@@ -4,6 +4,7 @@ import PageBanner from "@/components/PageBanner";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getStrapiMedia } from "@/lib/media"; // ✅ Added helper
+import PageSchemaScript from "@/components/PageSchemaScript"; // ✅ Added
 
 // ----------------------
 // Types
@@ -39,6 +40,12 @@ interface FraudAlert {
       description: string;
     };
   };
+  PageSchema?: {
+    Name: string;
+    RatingValue: number;
+    RatingCount: number;
+    ReviewCount: number;
+  };
 }
 
 // ----------------------
@@ -60,18 +67,14 @@ async function getFraudAlertData(): Promise<FraudAlert | null> {
       description:
         data.description?.[0]?.children?.[0]?.text || "Stay alert for fraud.",
 
-      // ----------------------
-      // ✅ Banner Image Fix using getStrapiMedia
-      // ----------------------
+      // Banner
       banner: {
         title: data.pagebanner?.title || "",
         heading: data.pagebanner?.heading || "",
         image: getStrapiMedia(data.pagebanner?.image?.url || null) || undefined,
       },
 
-      // ----------------------
       // Sections
-      // ----------------------
       sections:
         data.CommonSection?.map((section: any) => ({
           title: section.title,
@@ -79,13 +82,10 @@ async function getFraudAlertData(): Promise<FraudAlert | null> {
             section.description?.map(
               (p: any) => p.children?.map((c: any) => c.text).join(" ")
             ) || [],
-          image:
-            getStrapiMedia(section.image?.url || null) || undefined, // ✅ safe conversion
+          image: getStrapiMedia(section.image?.url || null) || undefined,
         })) || [],
 
-      // ----------------------
       // Metadata
-      // ----------------------
       metadata: {
         title: data.Metadata?.title || "",
         description:
@@ -94,8 +94,7 @@ async function getFraudAlertData(): Promise<FraudAlert | null> {
         openGraph: {
           title: data.Metadata?.openGraph?.title || "",
           description:
-            data.Metadata?.openGraph?.description?.[0]?.children?.[0]?.text ||
-            "",
+            data.Metadata?.openGraph?.description?.[0]?.children?.[0]?.text || "",
           url: data.Metadata?.openGraph?.url || "",
           siteName: data.Metadata?.openGraph?.siteName || "",
         },
@@ -106,6 +105,21 @@ async function getFraudAlertData(): Promise<FraudAlert | null> {
             data.Metadata?.twitter?.description?.[0]?.children?.[0]?.text || "",
         },
       },
+
+      // PageSchema
+      PageSchema: data.PageSchema
+        ? {
+            Name: data.PageSchema.Name || "Fraud Alert Page",
+            RatingValue: data.PageSchema.RatingValue ?? 0,
+            RatingCount: data.PageSchema.RatingCount ?? 0,
+            ReviewCount: data.PageSchema.ReviewCount ?? 0,
+          }
+        : {
+            Name: "Fraud Alert Page",
+            RatingValue: 0,
+            RatingCount: 0,
+            ReviewCount: 0,
+          },
     };
 
     return fraudAlert;
@@ -149,6 +163,9 @@ export default async function FraudAlertPage() {
 
   return (
     <section className="relative poppins w-auto bg-[#d2ab67] mx-auto">
+      {/* ✅ Page Schema Script */}
+      <PageSchemaScript schema={page.PageSchema} />
+
       {/* Page Banner */}
       <PageBanner
         title={page.banner.title}

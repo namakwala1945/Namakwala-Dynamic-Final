@@ -6,6 +6,7 @@ export const revalidate = 0;
 import PageBanner from "@/components/PageBanner";
 import Image from "next/image";
 import { getStrapiMedia } from "@/lib/media"; // ✅ ADDED
+import PageSchemaScript from "@/components/PageSchemaScript"; // ✅ ADDED
 
 const API_URL = `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/export-terms-and-condition?populate[Metadata][populate]=*&populate[PageSchema][populate]=*&populate[pagebanner][populate]=*&populate[CommonSection][populate]=*`;
 
@@ -32,6 +33,12 @@ interface ExportTermsData {
   title: string;
   description: StrapiDescription[];
   Metadata: any;
+  PageSchema?: {
+    Name: string;
+    RatingValue: number;
+    RatingCount: number;
+    ReviewCount: number;
+  };
   pagebanner: {
     title: string;
     heading: string;
@@ -66,8 +73,26 @@ export default async function ExportTermsPage() {
   const banner = data.pagebanner;
   const sections = data.CommonSection;
 
+  // ✅ Schema extraction with fallback
+  const schema = data?.PageSchema
+    ? {
+        Name: data.PageSchema.Name || "Export Terms Page",
+        RatingValue: data.PageSchema.RatingValue ?? 0,
+        RatingCount: data.PageSchema.RatingCount ?? 0,
+        ReviewCount: data.PageSchema.ReviewCount ?? 0,
+      }
+    : {
+        Name: "Export Terms Page",
+        RatingValue: 0,
+        RatingCount: 0,
+        ReviewCount: 0,
+      };
+
   return (
     <section className="relative poppins">
+      {/* ✅ Page Schema Script */}
+      <PageSchemaScript schema={schema} />
+
       {/* ✅ Banner Image with getStrapiMedia */}
       <PageBanner
         title={banner?.title}

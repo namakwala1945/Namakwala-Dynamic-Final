@@ -1,8 +1,10 @@
+// app/blog/[slug]/page.tsx
 import PageBanner from "@/components/PageBanner";
 import { notFound } from "next/navigation";
 import { Metadata as NextMetadata } from "next";
 import Image from "next/image";
 import { getStrapiMedia } from "@/lib/media";
+import PageSchemaScript from "@/components/PageSchemaScript"; // ✅ import schema component
 
 // ----------------------
 // ✅ Fetch Blog by Slug
@@ -21,6 +23,7 @@ async function getBlogData(slug: string) {
     return null;
   }
 }
+
 // ----------------------------------------------
 // Fetch all blogs (for sidebar + next/prev)
 // ----------------------------------------------
@@ -118,8 +121,28 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
 
   const banner = blog.pagebanner;
 
+  // -----------------------
+  // ✅ Prepare Schema
+  // -----------------------
+  const schema = blog?.PageSchema
+    ? {
+        Name: blog.PageSchema.Name || blog.title,
+        RatingValue: blog.PageSchema.RatingValue ?? 0,
+        RatingCount: blog.PageSchema.RatingCount ?? 0,
+        ReviewCount: blog.PageSchema.ReviewCount ?? 0,
+      }
+    : {
+        Name: blog.title,
+        RatingValue: 0,
+        RatingCount: 0,
+        ReviewCount: 0,
+      };
+
   return (
     <section className="relative poppins">
+      {/* ✅ Page Schema Script */}
+      <PageSchemaScript schema={schema} />
+
       <PageBanner
         title={banner?.title || blog.title}
         image={
@@ -186,9 +209,9 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
             <div className="">
               {blogs.slice(0, 6).map((post: any) => {
                 const imgUrl = getStrapiMedia(
-                  post.pagebanner?.image?.url ||                                  // WHEN POPULATE IMAGE DIRECTLY
-                  post.pagebanner?.data?.attributes?.image?.data?.attributes?.url || // WHEN PAGEBANNER HAS IMAGE RELATION
-                  post.pagebanner?.data?.attributes?.url                            // WHEN PAGEBANNER ITSELF IS IMAGE
+                  post.pagebanner?.image?.url ||
+                  post.pagebanner?.data?.attributes?.image?.data?.attributes?.url ||
+                  post.pagebanner?.data?.attributes?.url
                 );
 
                 return (
@@ -230,10 +253,3 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
     </section>
   );
 }
-
-
-
-
-
-
-

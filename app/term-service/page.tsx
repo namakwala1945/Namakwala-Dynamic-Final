@@ -1,7 +1,9 @@
-// 🚀 Force dynamic rendering — always get latest Strapi data
+// app/terms-of-service/page.tsx
+"use client"; // Needed for PageSchemaScript
 export const dynamic = "force-dynamic";
 
 import PageBanner from "@/components/PageBanner";
+import PageSchemaScript from "@/components/PageSchemaScript";
 import Image from "next/image";
 import Script from "next/script";
 
@@ -36,6 +38,12 @@ interface TermsOfServiceData {
     image: StrapiImage;
   };
   CommonSection: Section[];
+  PageSchema?: {
+    Name: string;
+    RatingValue: number;
+    RatingCount: number;
+    ReviewCount: number;
+  };
 }
 
 // ----------------------
@@ -43,9 +51,7 @@ interface TermsOfServiceData {
 // ----------------------
 async function getTermsData(): Promise<TermsOfServiceData> {
   const res = await fetch(API_URL, { cache: "no-store" });
-
   if (!res.ok) throw new Error("Failed to fetch Terms of Service data");
-
   const json = await res.json();
   return json.data;
 }
@@ -58,19 +64,19 @@ export async function generateMetadata() {
   const meta = data.Metadata;
 
   return {
-    title: meta?.title,
+    title: meta?.title || "Terms of Service | Namakwala",
     description: meta?.description?.[0]?.children?.[0]?.text ?? "Namakwala Terms of Service",
     keywords: meta?.keywords,
-    alternates: { canonical: meta?.openGraph?.url },
+    alternates: { canonical: meta?.openGraph?.url || "https://www.namakwala.in/terms-of-service" },
     openGraph: {
-      title: meta?.openGraph?.title,
+      title: meta?.openGraph?.title || data.title,
       description: meta?.openGraph?.description?.[0]?.children?.[0]?.text,
-      url: meta?.openGraph?.url,
+      url: meta?.openGraph?.url || "https://www.namakwala.in/terms-of-service",
       siteName: meta?.openGraph?.siteName,
     },
     twitter: {
-      card: meta?.twitter?.card,
-      title: meta?.twitter?.title,
+      card: meta?.twitter?.card || "summary_large_image",
+      title: meta?.twitter?.title || data.title,
       description: meta?.twitter?.description?.[0]?.children?.[0]?.text,
     },
   };
@@ -85,18 +91,17 @@ export default async function TermsOfServicePage() {
   const sections = data.CommonSection;
   const baseUrl = process.env.NEXT_PUBLIC_STRAPI_URL;
 
+  const pageSchema = {
+    Name: data.PageSchema?.Name || "Terms of Service",
+    RatingValue: data.PageSchema?.RatingValue ?? 0,
+    RatingCount: data.PageSchema?.RatingCount ?? 0,
+    ReviewCount: data.PageSchema?.ReviewCount ?? 0,
+  };
+
   return (
     <section className="relative bg-gray-100 poppins">
-      {/* ✅ Structured Data */}
-      <Script type="application/ld+json" id="terms-schema">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "WebPage",
-          name: data.title,
-          description: data.description?.[0]?.children?.[0]?.text,
-          url: data.Metadata?.openGraph?.url,
-        })}
-      </Script>
+      {/* ✅ Page Schema */}
+      <PageSchemaScript schema={pageSchema} />
 
       {/* ✅ Breadcrumb structured data */}
       <Script type="application/ld+json" id="breadcrumb-schema">

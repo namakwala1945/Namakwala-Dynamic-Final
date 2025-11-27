@@ -1,12 +1,15 @@
+// app/privacy-policy/page.tsx
+"use client"; // Required for PageSchemaScript
 import PageBanner from "@/components/PageBanner";
+import PageSchemaScript from "@/components/PageSchemaScript"; // ✅ Client schema
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Metadata as NextMetadata } from "next";
 import { getStrapiMedia } from "@/lib/media";
 
-// ------------------------------------
+// ----------------------
 // Types
-// ------------------------------------
+// ----------------------
 interface Section {
   title: string;
   description: string[];
@@ -29,12 +32,18 @@ interface PageData {
     canonicalURL?: string;
     metaImage?: string | null;
   };
+  pageSchema?: {
+    Name: string;
+    RatingValue: number;
+    RatingCount: number;
+    ReviewCount: number;
+  };
 }
 
-// ------------------------------------
+// ----------------------
 // Fetch function
-// ------------------------------------
-async function getPrivacyPolicyData() {
+// ----------------------
+async function getPrivacyPolicyData(): Promise<any> {
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/privacy-policy?populate[Metadata][populate]=*&populate[PageSchema][populate]=*&populate[pagebanner][populate]=*&populate[CommonSection][populate]=*`,
@@ -51,15 +60,14 @@ async function getPrivacyPolicyData() {
   }
 }
 
-// ------------------------------------
+// ----------------------
 // Metadata
-// ------------------------------------
+// ----------------------
 export async function generateMetadata(): Promise<NextMetadata> {
   const data = await getPrivacyPolicyData();
   if (!data) return {};
 
   const meta = data.Metadata || {};
-
   const metaImage = meta.metaImage?.url
     ? getStrapiMedia(meta.metaImage.url)
     : "/default-og-image.jpg";
@@ -87,9 +95,9 @@ export async function generateMetadata(): Promise<NextMetadata> {
   };
 }
 
-// ------------------------------------
+// ----------------------
 // Component
-// ------------------------------------
+// ----------------------
 export default async function PrivacyPolicyPage() {
   const data = await getPrivacyPolicyData();
   if (!data) return notFound();
@@ -100,24 +108,19 @@ export default async function PrivacyPolicyPage() {
   const page: PageData = {
     title: data.title,
     description: data.description?.[0]?.children?.[0]?.text || "",
-
     banner: {
       title: data.pagebanner?.title,
       heading: data.pagebanner?.heading,
       image: getStrapiMedia(data.pagebanner?.image?.url),
     },
-
     sections:
       data.CommonSection?.map((item: any) => ({
         title: item.title,
         description: (item.description || [])
-          .map((d: any) =>
-            d.children?.map((c: any) => c.text).join(" ")
-          )
+          .map((d: any) => d.children?.map((c: any) => c.text).join(" "))
           .filter(Boolean),
         image: getStrapiMedia(item.image?.url),
       })) || [],
-
     meta: data.Metadata && {
       metaTitle: data.Metadata.metaTitle,
       metaDescription: data.Metadata.metaDescription,
@@ -125,13 +128,22 @@ export default async function PrivacyPolicyPage() {
       canonicalURL: data.Metadata.canonicalURL,
       metaImage: getStrapiMedia(data.Metadata.metaImage?.url),
     },
+    pageSchema: {
+      Name: data.PageSchema?.Name || "Privacy Policy",
+      RatingValue: data.PageSchema?.RatingValue ?? 0,
+      RatingCount: data.PageSchema?.RatingCount ?? 0,
+      ReviewCount: data.PageSchema?.ReviewCount ?? 0,
+    },
   };
 
-  // ------------------------------------
+  // -------------------------------
   // Page Render
-  // ------------------------------------
+  // -------------------------------
   return (
     <section className="relative poppins">
+      {/* ✅ Page Schema */}
+      <PageSchemaScript schema={page.pageSchema} />
+
       {/* Banner */}
       <PageBanner
         title={page.banner.title || ""}
