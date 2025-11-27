@@ -77,6 +77,14 @@ export default async function BlogPage() {
 
   if (!blogPage) return notFound();
 
+  // ⭐ Sort newest → oldest
+  blogs.sort((a: any, b: any) => {
+    const dateA = new Date(a?.PublishedDate ?? "").getTime();
+    const dateB = new Date(b?.PublishedDate ?? "").getTime();
+    return dateB - dateA; // newest first
+  });
+
+
   const banner = blogPage.pagebanner;
 
   return (
@@ -97,7 +105,6 @@ export default async function BlogPage() {
             blogs.map((post: any) => {
               const imgUrl = getStrapiMedia(post.pagebanner?.image?.url);
               return (
-                // ✅ Link directly to root-level slug
                 <Link key={post.documentId} href={`/${post.slug}.html`}>
                   <div className="group cursor-pointer">
                     <div className="relative overflow-hidden rounded-2xl shadow-md">
@@ -126,6 +133,7 @@ export default async function BlogPage() {
           ) : (
             <p className="text-center text-gray-600 col-span-full">No blogs found.</p>
           )}
+
         </div>
       </div>
     </section>

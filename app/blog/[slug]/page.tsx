@@ -1,6 +1,8 @@
 import PageBanner from "@/components/PageBanner";
 import { notFound } from "next/navigation";
 import { Metadata as NextMetadata } from "next";
+import Image from "next/image";
+import { getStrapiMedia } from "@/lib/media";
 
 // ----------------------
 // ✅ Fetch Blog by Slug
@@ -17,6 +19,27 @@ async function getBlogData(slug: string) {
   } catch (error) {
     console.error("Error fetching blog:", error);
     return null;
+  }
+}
+// ----------------------------------------------
+// Fetch all blogs (for sidebar + next/prev)
+// ----------------------------------------------
+async function getAllBlogs() {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/blogs?populate[pagebanner][populate]=*`,
+      { next: { revalidate: 60 } }
+    );
+    const { data } = await res.json();
+
+    return data.sort(
+      (a: any, b: any) =>
+        new Date(b.PublishedDate).getTime() -
+        new Date(a.PublishedDate).getTime()
+    );
+  } catch (e) {
+    console.log(e);
+    return [];
   }
 }
 
@@ -78,10 +101,20 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 // ✅ Single Blog Component
 // ----------------------
 export default async function BlogDetailPage({ params }: { params: { slug: string } }) {
-  const { slug } = await params;      // ⬅ FIX HERE
+  const { slug } = params;
 
   const blog = await getBlogData(slug);
+  const blogs = await getAllBlogs();
+
   if (!blog) return notFound();
+
+  // -----------------------
+  // FIND NEXT + PREVIOUS
+  // -----------------------
+  const index = blogs.findIndex((b: any) => b.slug === slug);
+
+  const prevBlog = blogs[index + 1] || null;
+  const nextBlog = blogs[index - 1] || null;
 
   const banner = blog.pagebanner;
 
@@ -97,15 +130,101 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
         category="Blog"
       />
 
-      <div className="container mx-auto px-6 py-16 max-w-3xl prose prose-lg">
-        <div className="mb-6 text-gray-600 text-sm">
-          By <span className="font-semibold">{blog.AuthorName}</span> •{" "}
-          {new Date(blog.PublishedDate).toLocaleDateString()}
-        </div>
+      {/* ---------------------- */}
+      {/* MAIN LAYOUT */}
+      {/* ---------------------- */}
+      <div className="w-auto bg-[#d2ab67] mx-auto px-6 py-12 space-y-24">
+        <div className="container bg-white mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-10">
+          {/* LEFT SIDE – Blog Content */}
+          <div className="lg:col-span-8">
+            <h1 className="text-4xl mb-4 playfair text-gradient font-extrabold">{blog.title}</h1>
+            <div className="mb-4 text-gray-600 text-sm">
+              By <span className="font-semibold">{blog.AuthorName}</span> •{" "}
+              {new Date(blog.PublishedDate).toLocaleDateString()}
+            </div>
+            <hr className="mb-4"></hr>
+            {/* BLOG BODY */}
+            <div className="prose prose-lg max-w-full">
+              {blog.content?.map((block: any, i: number) => (
+                <p key={i}>{block.children?.[0]?.text}</p>
+              ))}
+            </div>
 
-        {blog.content?.map((block: any, i: number) => (
-          <p key={i}>{block.children?.[0]?.text}</p>
-        ))}
+            {/* NEXT / PREVIOUS LINKS */}
+            <div className="flex justify-between mt-12 border-t pt-6 text-sm">
+
+              {prevBlog ? (
+                <a
+                  href={`/${prevBlog.slug}.html`}
+                  className="text-gray-600 hover:text-orange-600 hover:underline"
+                >
+                  ← {prevBlog.title}
+                </a>
+              ) : (
+                <span />
+              )}
+
+              {nextBlog ? (
+                <a
+                  href={`/${nextBlog.slug}.html`}
+                  className="text-gray-600 hover:text-orange-600 hover:underline"
+                >
+                {nextBlog.title} →
+                </a>
+              ) : (
+                <span />
+              )}
+
+            </div>
+          </div>
+
+          {/* RIGHT SIDE – Professional Blog List */}
+          <div className="lg:col-span-4">
+            <h2 className="text-3xl font-bold mb-6 text-gray-900 border-b pb-3">
+              Latest Blogs
+            </h2>
+
+            <div className="">
+              {blogs.slice(0, 6).map((post: any) => {
+                const imgUrl = getStrapiMedia(
+                  post.pagebanner?.image?.url ||                                  // WHEN POPULATE IMAGE DIRECTLY
+                  post.pagebanner?.data?.attributes?.image?.data?.attributes?.url || // WHEN PAGEBANNER HAS IMAGE RELATION
+                  post.pagebanner?.data?.attributes?.url                            // WHEN PAGEBANNER ITSELF IS IMAGE
+                );
+
+                return (
+                  <a
+                    key={post.documentId}
+                    href={`/${post.slug}.html`}
+                    className="flex gap-4 p-2 hover:shadow-lg transition-all duration-300 bg-white hover:-translate-y-1"
+                  >
+                    {/* Thumbnail */}
+                    <div className="w-20 h-20 min-w-20 overflow-hidden shadow-sm">
+                      <Image
+                        src={imgUrl || "/optimized/fallback-image.jpg"}
+                        alt={post.title}
+                        width={120}
+                        height={120}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+
+                    {/* Text */}
+                    <div className="flex-1">
+                      <h3 className="text-gray-800 text-gradient font-extrabold hover:text-orange-600 transition">
+                        {post.title}
+                      </h3>
+
+                      <p className="text-[12px] text-gray-500 mt-1">
+                        {new Date(post.PublishedDate).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
