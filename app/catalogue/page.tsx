@@ -1,6 +1,5 @@
 import CatalogueClient from "./CatalogueClient";
 import PageBanner from "@/components/PageBanner";
-import PageSchemaScript from "@/components/PageSchemaScript"; // ✅ Import schema component
 
 const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || `${process.env.NEXT_PUBLIC_STRAPI_URL}`;
 
@@ -9,7 +8,7 @@ const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || `${process.env.NEXT_PUBL
 // ------------------------------
 async function getCatalogueData() {
   const res = await fetch(
-    `${strapiUrl}/api/catalogue?populate[Metadata][populate]=*&populate[PageSchema][populate]=*&populate[pagebanner][populate]=*&populate[catalogue][populate]=*`,
+    `${strapiUrl}/api/catalogue?populate[Metadata][populate]=*&populate[pagebanner][populate]=*&populate[catalogue][populate]=*`,
     {
       cache: "no-store",
     }
@@ -68,21 +67,6 @@ async function getCatalogueData() {
         : null,
   }));
 
-  // ✅ Extract schema safely
-  const schema = data.PageSchema
-    ? {
-        Name: data.PageSchema.Name || data.title || "Catalogue",
-        RatingValue: data.PageSchema.RatingValue ?? 0,
-        RatingCount: data.PageSchema.RatingCount ?? 0,
-        ReviewCount: data.PageSchema.ReviewCount ?? 0,
-      }
-    : {
-        Name: data.title || "Catalogue",
-        RatingValue: 0,
-        RatingCount: 0,
-        ReviewCount: 0,
-      };
-
   return {
     banner: {
       title: pagebanner.title || "",
@@ -95,7 +79,6 @@ async function getCatalogueData() {
       "Download our complete product catalogue or browse individual ones below.",
     items,
     metadata: meta,
-    schema, // ✅ add schema here
   };
 }
 
@@ -141,9 +124,6 @@ export default async function CataloguePage() {
 
   return (
     <section className="relative poppins">
-      {/* ✅ Page Schema Script */}
-      <PageSchemaScript schema={page.schema} />
-
       {/* ✅ Page Banner */}
       <div className="inset-0 top-0">
         <PageBanner

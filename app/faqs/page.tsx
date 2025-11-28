@@ -3,7 +3,6 @@ import PageBanner from "@/components/PageBanner";
 import { Metadata as NextMetadata } from "next";
 import { notFound } from "next/navigation";
 import { FiChevronDown } from "react-icons/fi";
-import PageSchemaScript from "@/components/PageSchemaScript"; // ✅ ADDED
 
 // ----------------------
 // Fetch Function
@@ -93,28 +92,8 @@ export default async function FaqPage() {
   const banner = data.pagebanner;
   const faqs = data.faqs || [];
 
-  // ----------------------
-  // ✅ PageSchema
-  // ----------------------
-  const schema = data?.PageSchema
-    ? {
-        Name: data.PageSchema.Name || "FAQ Page",
-        RatingValue: data.PageSchema.RatingValue ?? 0,
-        RatingCount: data.PageSchema.RatingCount ?? 0,
-        ReviewCount: data.PageSchema.ReviewCount ?? 0,
-      }
-    : {
-        Name: "FAQ Page",
-        RatingValue: 0,
-        RatingCount: 0,
-        ReviewCount: 0,
-      };
-
   return (
     <section className="relative poppins">
-      {/* ✅ Page Schema Script */}
-      <PageSchemaScript schema={schema} />
-
       {/* ✅ Page Banner */}
       <PageBanner
         title={banner?.title || "FAQs"}

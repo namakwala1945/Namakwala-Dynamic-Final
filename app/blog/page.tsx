@@ -26,7 +26,7 @@ async function getBlogPageData() {
 async function getBlogsData() {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/blogs?populate[Metadata][populate]=*&populate[PageSchema][populate]=*&populate[pagebanner][populate]=*`,
+      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/blogs?populate[Metadata][populate]=*&populate[pagebanner][populate]=*`,
       { next: { revalidate: 60 } }
     );
     if (!res.ok) throw new Error("Failed to fetch blogs");

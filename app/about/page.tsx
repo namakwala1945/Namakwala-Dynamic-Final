@@ -1,14 +1,13 @@
 // app/about/page.tsx
 import { Suspense } from "react";
 import AboutContent from "./AboutContent";
-import PageSchemaScript from "@/components/PageSchemaScript"; // ✅ import PageSchemaScript
 
 // ----------------------
 // 🔹 Fetch Function
 // ----------------------
 async function getAboutUsData() {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/about-us?populate[Metadata][populate]=*&populate[PageSchema][populate]=*&populate[pagebanner][populate]=*&populate[OurJourney][populate]=*&populate[KnowAboutUs][populate]=*&populate[KeyMilestonesOptions][populate]=*&populate[CommonSection][populate]=*`,
+    `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/about-us?populate[Metadata][populate]=*&populate[pagebanner][populate]=*&populate[OurJourney][populate]=*&populate[KnowAboutUs][populate]=*&populate[KeyMilestonesOptions][populate]=*&populate[CommonSection][populate]=*`,
     { cache: "no-store" }
   );
   if (!res.ok) throw new Error("Failed to fetch About Us data");
@@ -55,30 +54,9 @@ export async function generateMetadata() {
 // ----------------------
 export default async function AboutPage() {
   const data = await getAboutUsData();
-
-  // ✅ Prepare schema safely (fallbacks prevent red underline)
-  const schema = data?.PageSchema
-    ? {
-        Name: data.PageSchema.Name || "About Namakwala",
-        RatingValue: data.PageSchema.RatingValue ?? 0,
-        RatingCount: data.PageSchema.RatingCount ?? 0,
-        ReviewCount: data.PageSchema.ReviewCount ?? 0,
-      }
-    : {
-        Name: "About Namakwala",
-        RatingValue: 0,
-        RatingCount: 0,
-        ReviewCount: 0,
-      };
-
   return (
-    <>
-      {/* ✅ Page Schema Script */}
-      <PageSchemaScript schema={schema} />
-
-      <Suspense fallback={<div className="text-center py-20">Loading...</div>}>
-        <AboutContent data={data} />
-      </Suspense>
-    </>
+    <Suspense fallback={<div className="text-center py-20">Loading...</div>}>
+      <AboutContent data={data} />
+    </Suspense>
   );
 }

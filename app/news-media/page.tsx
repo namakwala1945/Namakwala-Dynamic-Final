@@ -1,29 +1,30 @@
 import PageBanner from "@/components/PageBanner";
 import NewsMediaTabs from "@/components/NewsMediaTabs";
-import PageSchemaScript from "@/components/PageSchemaScript"; // ✅ Added
 import Script from "next/script";
 import { Metadata as NextMetadata } from "next";
 
 const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || `${process.env.NEXT_PUBLIC_STRAPI_URL}`;
 
 /* -------------------------------------------------------------------------- */
-/* ✅ Force Dynamic Rendering                                                   */
+/* ✅ Force Dynamic Rendering (Prevents build error)                          */
 /* -------------------------------------------------------------------------- */
-export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic"; // 👈 Add this line
+// This ensures the page is rendered dynamically and can safely use no-store fetch.
 
 /* -------------------------------------------------------------------------- */
-/* ✅ Fetch Data from Strapi                                                   */
+/* ✅ Fetch Data from Strapi                                                  */
 /* -------------------------------------------------------------------------- */
 async function getPageData() {
   try {
     const res = await fetch(
-      `${strapiUrl}/api/news-and-media?populate[Metadata][populate]=*&populate[PageSchema][populate]=*&populate[pagebanner][populate]=*&populate[TypeOfMedia][populate][Media][populate]=*`,
-      { cache: "no-store" }
+      `${strapiUrl}/api/news-and-media?populate[Metadata][populate]=*&populate[pagebanner][populate]=*&populate[TypeOfMedia][populate][Media][populate]=*`,
+      { cache: "no-store" } // always fetch fresh (safe because of force-dynamic)
     );
 
     if (!res.ok) throw new Error("Failed to fetch data");
     const json = await res.json();
     const raw = json?.data;
+
     if (!raw) return null;
 
     const description =
@@ -43,6 +44,7 @@ async function getPageData() {
 
     const meta = raw?.Metadata || null;
 
+    /* ------------------ 🧠 Dynamic Media Types (Tabs) ------------------- */
     const mediaTypes =
       raw?.TypeOfMedia?.map((type: any) => ({
         id: type.id,
@@ -50,7 +52,7 @@ async function getPageData() {
         Media:
           type.Media?.map((m: any) => ({
             title: m.title || "Untitled",
-            url: m.URL || null,
+            url: m.URL || null, // Video URL
             media:
               m.media?.map((img: any) => ({
                 url: img?.url ? `${strapiUrl}${img.url}` : "/fallback-image.jpg",
@@ -59,21 +61,7 @@ async function getPageData() {
           })) || [],
       })) || [];
 
-    const pageSchema = raw?.PageSchema
-      ? {
-          Name: raw.PageSchema.Name || "News & Media",
-          RatingValue: raw.PageSchema.RatingValue ?? 0,
-          RatingCount: raw.PageSchema.RatingCount ?? 0,
-          ReviewCount: raw.PageSchema.ReviewCount ?? 0,
-        }
-      : {
-          Name: "News & Media",
-          RatingValue: 0,
-          RatingCount: 0,
-          ReviewCount: 0,
-        };
-
-    return { title: raw?.title, description, banner, meta, mediaTypes, pageSchema };
+    return { title: raw?.title, description, banner, meta, mediaTypes };
   } catch (err) {
     console.error("❌ Error fetching News & Media:", err);
     return null;
@@ -81,7 +69,7 @@ async function getPageData() {
 }
 
 /* -------------------------------------------------------------------------- */
-/* ✅ Metadata Generator                                                       */
+/* ✅ Metadata Generator                                                      */
 /* -------------------------------------------------------------------------- */
 export async function generateMetadata(): Promise<NextMetadata> {
   const data = await getPageData();
@@ -106,7 +94,7 @@ export async function generateMetadata(): Promise<NextMetadata> {
 }
 
 /* -------------------------------------------------------------------------- */
-/* ✅ UI Component                                                             */
+/* ✅ UI Component                                                            */
 /* -------------------------------------------------------------------------- */
 export default async function NewsMediaPage() {
   const data = await getPageData();
@@ -114,8 +102,14 @@ export default async function NewsMediaPage() {
 
   return (
     <section className="relative bg-[#fdf2df] poppins">
-      {/* ✅ Page Schema */}
-      <PageSchemaScript schema={data.pageSchema} />
+      <Script type="application/ld+json" id="newsmedia-schema">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          name: data.title,
+          description: data.description,
+        })}
+      </Script>
 
       <div className="relative h-96 w-full overflow-hidden">
         <PageBanner
