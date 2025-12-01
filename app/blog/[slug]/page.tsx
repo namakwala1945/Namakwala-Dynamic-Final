@@ -1,18 +1,18 @@
 // app/blog/[slug]/page.tsx
 import PageBanner from "@/components/PageBanner";
 import { notFound } from "next/navigation";
-import { Metadata as NextMetadata } from "next";
 import Image from "next/image";
 import { getStrapiMedia } from "@/lib/media";
-import PageSchemaScript from "@/components/PageSchemaScript"; // ✅ import schema component
+import { BlocksRenderer } from "@strapi/blocks-react-renderer";
+import BlogContentRenderer from "../BlogContentRenderer";
 
 // ----------------------
-// ✅ Fetch Blog by Slug
+// Fetch Blog by Slug
 // ----------------------
 async function getBlogData(slug: string) {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/blogs?filters[slug][$eq]=${slug}&populate[Metadata][populate]=*&populate[pagebanner][populate]=*`,
+      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/blogs?filters[slug][$eq]=${slug}&populate[Metadata][populate]=*&populate[PageSchema][populate]=*&populate[pagebanner][populate]=*`,
       { next: { revalidate: 60 } }
     );
     if (!res.ok) throw new Error("Failed to fetch single blog");
@@ -24,9 +24,9 @@ async function getBlogData(slug: string) {
   }
 }
 
-// ----------------------------------------------
-// Fetch all blogs (for sidebar + next/prev)
-// ----------------------------------------------
+// ----------------------
+// Fetch all blogs
+// ----------------------
 async function getAllBlogs() {
   try {
     const res = await fetch(
@@ -37,8 +37,7 @@ async function getAllBlogs() {
 
     return data.sort(
       (a: any, b: any) =>
-        new Date(b.PublishedDate).getTime() -
-        new Date(a.PublishedDate).getTime()
+        new Date(b.PublishedDate).getTime() - new Date(a.PublishedDate).getTime()
     );
   } catch (e) {
     console.log(e);
@@ -47,14 +46,13 @@ async function getAllBlogs() {
 }
 
 // ----------------------
-// ✅ Static Params for SSG
+// Static Params
 // ----------------------
 export async function generateStaticParams() {
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/blogs`,
-      { next: { revalidate: 60 } }
-    );
+    const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/blogs`, {
+      next: { revalidate: 60 },
+    });
     const { data } = await res.json();
     return data.map((post: any) => ({ slug: post.slug }));
   } catch (error) {
@@ -64,15 +62,27 @@ export async function generateStaticParams() {
 }
 
 // ----------------------
-// ✅ Metadata
+// Metadata with JSON-LD
 // ----------------------
 export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const { slug } = await params;       // ⬅ IMPORTANT FIX
-
+  const { slug } = params;
   const blog = await getBlogData(slug);
   if (!blog) return {};
 
   const meta = blog.Metadata || {};
+  const schema = blog?.PageSchema
+    ? {
+        "@context": "http://schema.org/",
+        "@type": "Product",
+        name: blog.PageSchema.Name || blog.title,
+        aggregateRating: {
+          "@type": "AggregateRating",
+          ratingValue: blog.PageSchema.RatingValue ?? 0,
+          ratingCount: blog.PageSchema.RatingCount ?? 0,
+          reviewCount: blog.PageSchema.ReviewCount ?? 0,
+        },
+      }
+    : null;
 
   return {
     title: meta.title || blog.title,
@@ -82,8 +92,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       title: meta.openGraph?.title || blog.title,
       description:
         (meta.openGraph?.description &&
-          meta.openGraph?.description[0]?.children?.[0]?.text) || "",
-      url: meta.openGraph?.url || `${process.env.NEXT_PUBLIC_STRAPI_URL}/blog/${blog.slug}`,
+          meta.openGraph?.description[0]?.children?.[0]?.text) ||
+        "",
+      url: `${process.env.NEXT_PUBLIC_STRAPI_URL}/blog/${blog.slug}`,
       images: [
         blog.pagebanner?.image?.url
           ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${blog.pagebanner.image.url}`
@@ -95,54 +106,39 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       title: meta.twitter?.title || blog.title,
       description:
         (meta.twitter?.description &&
-          meta.twitter?.description[0]?.children?.[0]?.text) || "",
+          meta.twitter?.description[0]?.children?.[0]?.text) ||
+        "",
     },
+    // Inject JSON-LD in <head>
+    // This is valid for Next.js 14+ using metadata
+    // Google can read this for rich results
+    additionalMetaTags: schema
+      ? [
+          {
+            name: "ld+json",
+            content: JSON.stringify(schema),
+          },
+        ]
+      : [],
   };
 }
 
 // ----------------------
-// ✅ Single Blog Component
+// Blog Detail Page
 // ----------------------
 export default async function BlogDetailPage({ params }: { params: { slug: string } }) {
   const { slug } = params;
-
   const blog = await getBlogData(slug);
   const blogs = await getAllBlogs();
-
   if (!blog) return notFound();
 
-  // -----------------------
-  // FIND NEXT + PREVIOUS
-  // -----------------------
   const index = blogs.findIndex((b: any) => b.slug === slug);
-
   const prevBlog = blogs[index + 1] || null;
   const nextBlog = blogs[index - 1] || null;
-
   const banner = blog.pagebanner;
-
-  // -----------------------
-  // ✅ Prepare Schema
-  // -----------------------
-  const schema = blog?.PageSchema
-    ? {
-        Name: blog.PageSchema.Name || blog.title,
-        RatingValue: blog.PageSchema.RatingValue ?? 0,
-        RatingCount: blog.PageSchema.RatingCount ?? 0,
-        ReviewCount: blog.PageSchema.ReviewCount ?? 0,
-      }
-    : {
-        Name: blog.title,
-        RatingValue: 0,
-        RatingCount: 0,
-        ReviewCount: 0,
-      };
 
   return (
     <section className="relative poppins">
-      {/* ✅ Page Schema Script */}
-      <PageSchemaScript schema={schema} />
-
       <PageBanner
         title={banner?.title || blog.title}
         image={
@@ -153,28 +149,22 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
         category="Blog"
       />
 
-      {/* ---------------------- */}
-      {/* MAIN LAYOUT */}
-      {/* ---------------------- */}
       <div className="w-auto bg-[#d2ab67] mx-auto px-6 py-12 space-y-24">
         <div className="container bg-white mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* LEFT SIDE – Blog Content */}
+          {/* LEFT SIDE */}
           <div className="lg:col-span-8">
             <h1 className="text-4xl mb-4 playfair text-gradient font-extrabold">{blog.title}</h1>
-            <hr className="mb-4"></hr>
-            {/* BLOG BODY */}
-            <div className="prose prose-lg max-w-full text-justify prose-p:text-justify">
-              {blog.content?.map((block: any, i: number) => (
-                <p key={i}>{block.children?.[0]?.text}</p>
-              ))}
+            <hr className="mb-4" />
+            <div className="prose prose-lg max-w-full text-justify">
+              <BlogContentRenderer content={blog.content} />
             </div>
             <div className="mt-4 text-gray-600 text-sm text-right">
               By <span className="text-gradient font-extrabold">{blog.AuthorName}</span> •{" "}
               {new Date(blog.PublishedDate).toLocaleDateString()}
             </div>
-            {/* NEXT / PREVIOUS LINKS */}
-            <div className="flex justify-between mt-6 border-t pt-6 text-sm">
 
+            {/* NEXT / PREVIOUS */}
+            <div className="flex justify-between mt-6 border-t pt-6 text-sm">
               {prevBlog ? (
                 <a
                   href={`/${prevBlog.slug}.html`}
@@ -191,57 +181,46 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
                   href={`/${nextBlog.slug}.html`}
                   className="text-gray-600 hover:text-gradient hover:underline hover:font-extrabold"
                 >
-                {nextBlog.title} →
+                  {nextBlog.title} →
                 </a>
               ) : (
                 <span />
               )}
-
             </div>
           </div>
 
-          {/* RIGHT SIDE – Professional Blog List */}
+          {/* RIGHT SIDE – Latest Blogs */}
           <div className="lg:col-span-4">
-            <h2 className="text-4xl mb-4 playfair text-gradient font-extrabold">
-              Latest Blogs
-            </h2>
-            <hr className="mb-4"></hr>
-            <div className="">
+            <h2 className="text-3xl mb-4 playfair text-gradient font-extrabold">Latest Blogs</h2>
+            <hr className="mb-4 border-gray-300" />
+            <div className="flex flex-col gap-2">
               {blogs.slice(0, 6).map((post: any) => {
                 const imgUrl = getStrapiMedia(
                   post.pagebanner?.image?.url ||
-                  post.pagebanner?.data?.attributes?.image?.data?.attributes?.url ||
-                  post.pagebanner?.data?.attributes?.url
+                    post.pagebanner?.data?.attributes?.image?.data?.attributes?.url ||
+                    post.pagebanner?.data?.attributes?.url
                 );
-
                 return (
                   <a
                     key={post.documentId}
                     href={`/${post.slug}.html`}
-                    className="flex gap-4 p-2 hover:shadow-lg transition-all duration-300 bg-white hover:-translate-y-1"
+                    className="flex items-center gap-3 p-3 border border-gray-200 hover:border-orange-400 hover:shadow-lg transition-all duration-300 bg-white"
                   >
-                    {/* Thumbnail */}
-                    <div className="w-20 h-20 min-w-20 overflow-hidden shadow-sm">
+                    <div className="w-16 h-16 flex-shrink-0 overflow-hidden shadow-sm">
                       <Image
                         src={imgUrl || "/optimized/fallback-image.jpg"}
                         alt={post.title}
-                        width={120}
-                        height={120}
-                        className="w-full h-full object-cover"
+                        width={64}
+                        height={64}
+                        className="object-cover w-full h-full transform transition-transform duration-300 group-hover:scale-110"
                       />
                     </div>
-
-                    {/* Text */}
                     <div className="flex-1">
-                      <h3 className="text-gray-800 playfair text-gradient font-extrabold hover:text-orange-600 transition">
+                      <h3 className="text-gray-900 playfair font-semibold text-base hover:text-orange-500 transition-colors duration-300 line-clamp-2">
                         {post.title}
                       </h3>
-                      <p className="text-[13px] text-gray-500 mt-1 line-clamp-1 leading-tight">
-                        {post.Excerpt || post.short_description || ""}
-                      </p>
-                      <p className="text-[12px] text-gray-500 mt-1">
-                        {new Date(post.PublishedDate).toLocaleDateString()}
-                      </p>
+                      <p className="text-gray-600 text-sm mt-1 line-clamp-2">{post.Excerpt || post.short_description || ""}</p>
+                      <p className="text-gray-500 text-xs mt-0.5">{new Date(post.PublishedDate).toLocaleDateString()}</p>
                     </div>
                   </a>
                 );

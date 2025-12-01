@@ -24,7 +24,8 @@ export default function BusinessSection() {
       try {
         const res = await fetch(
           `${STRAPI_URL}/api/product-tabs?populate=*`,
-          { cache: "force-cache" }
+          { cache: "force-cache",next: { revalidate: 60 }, }
+          
         );
 
         const data = await res.json();

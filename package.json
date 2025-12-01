@@ -8,7 +8,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postbuild": "next-sitemap"
+    "postbuild": "next-sitemap",
+    "prepare": "echo Skipping Husky prepare step && husky install",
+     "test": "echo \"No tests yet\""
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
@@ -42,6 +44,7 @@
     "@react-email/render": "^1.2.3",
     "@react-three/drei": "^10.7.4",
     "@react-three/fiber": "^9.3.0",
+    "@strapi/blocks-react-renderer": "^1.0.2",
     "@tanstack/react-query": "^5.84.2",
     "@vercel/kv": "^3.0.0",
     "@vitalets/google-translate-api": "^9.2.1",
@@ -99,11 +102,12 @@
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/nodemailer": "^7.0.1",
-    "@types/react": "^19.1.12",
-    "@types/react-dom": "^19.1.9",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
     "critters": "^0.0.23",
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
+    "husky": "^8.0.0",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
   },

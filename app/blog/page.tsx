@@ -84,11 +84,10 @@ export default async function BlogPage() {
     return dateB - dateA; // newest first
   });
 
-
   const banner = blogPage.pagebanner;
 
   return (
-    <section className="relative poppins">
+    <section className="relative poppins bg-[#efefef]">
       <PageBanner
         title={banner?.title || "Blog"}
         image={getStrapiMedia(banner?.image?.url) || "/optimized/fallback-image.jpg"}
@@ -100,31 +99,86 @@ export default async function BlogPage() {
           {blogPage.title || "Our Blog"}
         </h1>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12 mt-8">
+        {/* ⭐ WOW Blog Grid */}
+        <div className="
+          grid 
+          sm:grid-cols-2 
+          lg:grid-cols-3 
+          xl:grid-cols-4 
+          gap-10 
+          mt-8
+        ">
           {blogs.length > 0 ? (
             blogs.map((post: any) => {
               const imgUrl = getStrapiMedia(post.pagebanner?.image?.url);
+
               return (
                 <Link key={post.documentId} href={`/${post.slug}.html`}>
-                  <div className="group cursor-pointer">
-                    <div className="relative overflow-hidden rounded-2xl shadow-md">
+                  <div
+                    className="
+                      group cursor-pointer overflow-hidden 
+                      bg-white/80 backdrop-blur-xl
+                      shadow-lg hover:shadow-2xl 
+                      transition-all duration-500 
+                      flex flex-col h-full
+                      hover:-translate-y-2 hover:scale-[1.02]
+                    "
+                  >
+                    {/* IMAGE */}
+                    <div className="relative h-52 w-full overflow-hidden">
+                      <div className="
+                        absolute inset-0 
+                        bg-gradient-to-t from-black/40 via-black/10 to-transparent 
+                        opacity-0 group-hover:opacity-100 
+                        transition-opacity duration-500
+                      "></div>
+
                       <Image
-                        src={imgUrl || "/optimized/fallback-image.jpg"}
+                        src={imgUrl || '/optimized/fallback-image.jpg'}
                         alt={post.title}
                         width={800}
                         height={500}
-                        className="object-cover w-full h-64 transition-transform duration-500 group-hover:scale-110"
+                        className="
+                          w-full h-full object-cover 
+                          transition-transform duration-[900ms] ease-out
+                          group-hover:scale-110 group-hover:rotate-[1deg]
+                        "
                       />
                     </div>
-                    <div className="mt-4">
-                      <h2 className="text-2xl font-semibold text-gray-900 group-hover:text-orange-500 transition-colors">
+
+                    {/* CONTENT */}
+                    <div className="p-5 flex flex-col flex-grow">
+                      <h2
+                        className="
+                          text-[20px] font-bold text-gray-900 leading-tight 
+                          group-hover:text-orange-500 
+                          transition-colors duration-400
+                        "
+                      >
                         {post.title}
                       </h2>
-                      <p className="text-gray-700 mt-2">{post.Excerpt}</p>
-                      <p className="text-sm text-gray-500 mt-1">
-                        By {post.AuthorName} |{" "}
-                        {new Date(post.PublishedDate).toLocaleDateString()}
+
+                      {/* SINGLE LINE EXCERPT */}
+                      <p
+                        className="
+                          text-gray-700 mt-2 
+                          line-clamp-1 
+                          group-hover:text-gray-900 
+                          transition
+                        "
+                      >
+                        {post.Excerpt}
                       </p>
+
+                      <div className="mt-auto pt-4 flex items-center justify-between text-gray-500 text-sm">
+                        <span className="group-hover:text-orange-600 transition">
+                          By {post.AuthorName}
+                        </span>
+
+                        <span>
+                          {new Date(post.PublishedDate).toLocaleDateString()}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </Link>
@@ -133,8 +187,8 @@ export default async function BlogPage() {
           ) : (
             <p className="text-center text-gray-600 col-span-full">No blogs found.</p>
           )}
-
         </div>
+
       </div>
     </section>
   );

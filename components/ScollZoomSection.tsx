@@ -11,45 +11,42 @@ export default function ScrollImageSection() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  const STRAPI_URL =
-    process.env.NEXT_PUBLIC_STRAPI_URL || `${process.env.NEXT_PUBLIC_STRAPI_URL}`;
+  const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL;
 
-  /** ---------------------------------------------
-   * ✅ Fetch image from Strapi with optimization
-   * ----------------------------------------------*/
+  /** ----------------------------------------------------
+   *  ✅ Fetch image from Strapi (works with your response)
+   * ----------------------------------------------------*/
   useEffect(() => {
     const fetchImage = async () => {
       try {
         const res = await fetch(
           `${STRAPI_URL}/api/scoll-zoom-sections?populate=*`,
           {
-            cache: "force-cache", // ⚡ Faster response
-            next: { revalidate: 60 }, // refresh every 60 sec
+            cache: "force-cache",
+            next: { revalidate: 60 },
           }
         );
 
         const json = await res.json();
         const item = json?.data?.[0];
 
-        // Try all possible Strapi formats
-        const image =
-          item?.image?.[0] ||
-          item?.attributes?.image?.data?.[0] ||
-          item?.attributes?.image?.data ||
-          null;
+        if (!item || !item.image || !item.image[0]) {
+          console.warn("⚠ No image found in Strapi response");
+          setImageUrl("/optimized/placeholder-large.webp");
+          return;
+        }
 
+        const img = item.image[0]; // Direct structure from your API
+
+        // Try large → medium → small → original → thumbnail
         const rawUrl =
-          image?.url ||
-          image?.attributes?.url ||
-          image?.formats?.large?.url ||
-          image?.formats?.medium?.url ||
-          image?.formats?.small?.url ||
-          image?.formats?.thumbnail?.url ||
-          null;
+          img.url ||
+          img.formats?.large?.url ||
+          img.formats?.medium?.url ||
+          img.formats?.small?.url ||
+          img.formats?.thumbnail?.url;
 
-        const optimizedUrl = getStrapiMedia(rawUrl);
-
-        setImageUrl(optimizedUrl);
+        setImageUrl(getStrapiMedia(rawUrl));
       } catch (err) {
         console.error("❌ Error fetching scroll image:", err);
         setImageUrl("/optimized/placeholder-large.webp");
@@ -60,8 +57,8 @@ export default function ScrollImageSection() {
   }, []);
 
   /** ---------------------------------------------
-   * ✅ Smooth GSAP Scroll Zoom Animation
-   * ----------------------------------------------*/
+   *  ✅ Smooth GSAP Scroll Zoom Animation
+   * ---------------------------------------------*/
   useEffect(() => {
     if (!imageUrl) return;
 
@@ -79,9 +76,9 @@ export default function ScrollImageSection() {
 
       if (!sectionRef.current || !imageWrapperRef.current) return;
 
+      // Kill any previous triggers
       ScrollTrigger.getAll().forEach((t: any) => t.kill());
 
-      // Smooth zoom effect
       gsap
         .timeline({
           scrollTrigger: {
@@ -91,7 +88,6 @@ export default function ScrollImageSection() {
             scrub: 0.5,
             pin: true,
             anticipatePin: 1,
-            ease: "power3.inOut",
           },
         })
         .fromTo(
@@ -110,7 +106,7 @@ export default function ScrollImageSection() {
 
   /** ---------------------------------------------
    * ⏳ Loading State
-   * ----------------------------------------------*/
+   * ---------------------------------------------*/
   if (!imageUrl) {
     return (
       <div className="flex justify-center items-center min-h-[60vh] text-gray-500">
@@ -120,12 +116,12 @@ export default function ScrollImageSection() {
   }
 
   /** ---------------------------------------------
-   * ✅ OUTPUT
-   * ----------------------------------------------*/
+   *  🚀 FINAL OUTPUT
+   * ---------------------------------------------*/
   return (
     <section
       ref={sectionRef}
-      className="relative w-full h-screen flex items-center justify-center overflow-hidden "
+      className="relative w-full h-screen flex items-center justify-center overflow-hidden"
     >
       <div
         ref={imageWrapperRef}
@@ -136,7 +132,7 @@ export default function ScrollImageSection() {
           alt="Scroll Zoom Image"
           fill
           priority
-          quality={75}
+          quality={80}
           placeholder="blur"
           blurDataURL="/optimized/placeholder-large.webp"
           onLoadingComplete={() => setIsLoaded(true)}

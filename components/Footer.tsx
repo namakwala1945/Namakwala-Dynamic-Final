@@ -26,7 +26,7 @@ const footerSections = [
     title: "Resources",
     links: [
       { name: "Our Catalogue", href: "/catalogue" },
-      { name: "News & Media", href: "/news-mdia" },
+      { name: "News & Media", href: "/news-media" },
       { name: "Contact Us", href: "/contact" },
       { name: "Blog", href: "/blog" },
       { name: "FAQs", href: "/faqs" },
