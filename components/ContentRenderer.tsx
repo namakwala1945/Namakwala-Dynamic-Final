@@ -2,7 +2,7 @@
 import React from "react";        // ✅ REQUIRED
 import type { JSX } from "react"; // ✅ EXTRA FIX FOR JSX.IntrinsicElements
 import { BlocksRenderer } from "@strapi/blocks-react-renderer";
-export default function BlogContentRenderer({ content }: { content: any }) {
+export default function ContentRenderer({ content }: { content: any }) {
   return (
     <BlocksRenderer
       content={content}

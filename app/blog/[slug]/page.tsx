@@ -3,8 +3,7 @@ import PageBanner from "@/components/PageBanner";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { getStrapiMedia } from "@/lib/media";
-import { BlocksRenderer } from "@strapi/blocks-react-renderer";
-import BlogContentRenderer from "../BlogContentRenderer";
+import ContentRenderer from "../../../components/ContentRenderer";
 
 // ----------------------
 // Fetch Blog by Slug
@@ -156,7 +155,7 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
             <h1 className="text-4xl mb-4 playfair text-gradient font-extrabold">{blog.title}</h1>
             <hr className="mb-4" />
             <div className="prose prose-lg max-w-full text-justify">
-              <BlogContentRenderer content={blog.content} />
+              <ContentRenderer content={blog.content} />
             </div>
             <div className="mt-4 text-gray-600 text-sm text-right">
               By <span className="text-gradient font-extrabold">{blog.AuthorName}</span> •{" "}
