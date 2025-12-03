@@ -22,46 +22,78 @@ async function fetchContactData() {
   return json.data;
 }
 
+// Helper for rich text array -> plain text
+const extractText = (arr: any[]) =>
+  arr?.map((block: any) =>
+    block.children?.map((c: any) => c.text).join(" ")
+  ).join(" ") || "";
+
 // -----------------------------
-// ⭐ METADATA GENERATOR
+// ⭐ METADATA GENERATOR (FIXED)
 // -----------------------------
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const data = await fetchContactData();
-    const meta = data?.Metadata ?? {};
+    const meta = data?.Metadata;
+
+    if (!meta) {
+      return {
+        title: "Contact Us | Namakwala",
+        description: "Get in touch with Namakwala for inquiries or support.",
+      };
+    }
+
+    // ---- Extract main metadata ----
+    const title = meta.title || "Contact Us | Namakwala";
+    const description = extractText(meta.description) || "Contact Namakwala.";
+    const keywords = meta.keywords || "";
+
+    // ---- OpenGraph ----
+    const ogTitle = meta.openGraph?.title || title;
+    const ogDesc = extractText(meta.openGraph?.description || []);
+    const ogUrl = meta.openGraph?.url || "https://www.namakwala.in/contact";
+    const ogSite = meta.openGraph?.siteName || "Namakwala Group";
+
+    // ---- Twitter ----
+    const twTitle = meta.twitter?.title || title;
+    const twDesc = extractText(meta.twitter?.description || []);
 
     return {
-      title: meta.metaTitle || "Contact Us | Namakwala",
-      description:
-        meta.metaDescription ||
-        "Get in touch with Namakwala for inquiries or support.",
-      keywords: meta.metaKeywords || "contact, namakwala, salt, minerals",
+      title,
+      description,
+      keywords,
 
       alternates: {
-        canonical: meta.canonicalURL || "https://www.namakwala.in/contact",
+        canonical: ogUrl,
       },
 
       openGraph: {
-        title: meta.metaTitle || data.Title,
-        description: meta.metaDescription,
-        url: meta.canonicalURL || "https://www.namakwala.in/contact",
-        siteName: meta.siteName || "Namakwala",
-        images: meta.metaImage?.url
-          ? [`${STRAPI_URL}${meta.metaImage.url}`]
-          : ["/default-og-image.jpg"],
+        title: ogTitle,
+        description: ogDesc,
+        url: ogUrl,
+        siteName: ogSite,
+        images: [
+          data.pagebanner?.image?.url
+            ? `${STRAPI_URL}${data.pagebanner.image.url}`
+            : "/default-og-image.jpg",
+        ],
         type: "website",
       },
 
       twitter: {
         card: "summary_large_image",
-        title: meta.metaTitle || data.Title,
-        description: meta.metaDescription,
-        images: meta.metaImage?.url
-          ? [`${STRAPI_URL}${meta.metaImage.url}`]
-          : ["/default-og-image.jpg"],
-      },
+        title: twTitle,
+        description: twDesc,
+        images: [
+          data.pagebanner?.image?.url
+            ? `${STRAPI_URL}${data.pagebanner.image.url}`
+            : "/default-og-image.jpg",
+        ],
+      }
     };
+
   } catch (error) {
+    console.log("❌ Metadata fetch failed", error);
     return {
       title: "Contact Us | Namakwala",
       description: "Get in touch with Namakwala.",
@@ -78,7 +110,6 @@ export default async function ContactPage() {
 
   return (
     <>
-      {/* ✅ JSON-LD (Schema) correctly injected */}
       {schema && (
         <script
           type="application/ld+json"
@@ -86,7 +117,6 @@ export default async function ContactPage() {
         />
       )}
 
-      {/* Page Component */}
       <ContactClient pageData={data} />
     </>
   );
