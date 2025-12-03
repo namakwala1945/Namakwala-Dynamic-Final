@@ -8,23 +8,22 @@ const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || `${process.env.NEXT_PUBL
 // ------------------------------
 async function getCatalogueData() {
   const res = await fetch(
-    `${strapiUrl}/api/catalogue?populate[Metadata][populate]=*&populate[pagebanner][populate]=*&populate[catalogue][populate]=*`,
-    {
-      cache: "no-store",
-    }
+    `${strapiUrl}/api/catalogue?populate[Metadata][populate]=*&populate[pagebanner][populate]=*&populate[PageSchema][populate]=*&populate[catalogue][populate]=*`,
+    { cache: "no-store" }
   );
 
   if (!res.ok) {
-    console.error("❌ Failed to fetch catalogue data:", res.status);
     throw new Error("Failed to fetch catalogue data");
   }
 
   const json = await res.json();
+
   const data = json?.data;
+
   if (!data) throw new Error("No catalogue data found");
 
-  // ✅ Extract metadata safely
   const metadata = data.Metadata || {};
+
   const meta = {
     title: metadata.title || "",
     description:
@@ -46,26 +45,27 @@ async function getCatalogueData() {
     },
   };
 
-  // ✅ Extract banner
   const pagebanner = data.pagebanner || {};
   const bannerImageUrl =
     pagebanner?.image?.url
       ? `${strapiUrl}${pagebanner.image.url}`
       : "/optimized/fallback-image.jpg";
 
-  // ✅ Extract catalogue list (PDFs)
   const catalogueList = data.catalogue || [];
-  const items = catalogueList.map((item: any) => ({
-    id: item.id,
-    title: item.title || "Untitled Catalogue",
-    description: item.description?.[0]?.children?.[0]?.text || "",
-    file:
+  const items = catalogueList.map((item: any) => {
+    const fileUrl =
       item?.catalogue?.url
         ? `${strapiUrl}${item.catalogue.url}`
         : item?.catalogue?.data?.attributes?.url
         ? `${strapiUrl}${item.catalogue.data.attributes.url}`
-        : null,
-  }));
+        : null;
+    return {
+      id: item.id,
+      title: item.title || "Untitled Catalogue",
+      description: item.description?.[0]?.children?.[0]?.text || "",
+      file: fileUrl,
+    };
+  });
 
   return {
     banner: {
@@ -79,41 +79,55 @@ async function getCatalogueData() {
       "Download our complete product catalogue or browse individual ones below.",
     items,
     metadata: meta,
+    ogImage: bannerImageUrl,
+    schema: data.PageSchema || null,
   };
 }
 
-// ------------------------------
-// ✅ Dynamic Metadata for SEO
-// ------------------------------
-export async function generateMetadata() {
-  try {
-    const page = await getCatalogueData();
-    const m = page.metadata;
 
+// -------------------------------------
+// ⭐ METADATA GENERATOR (Your block)
+// -------------------------------------
+export async function generateMetadata({ params }: any) {
+  const data = await getCatalogueData();
+
+  if (!data || !data.metadata) {
     return {
-      title: m.title,
-      description: m.description,
-      keywords: m.keywords,
-      openGraph: {
-        title: m.openGraph.title,
-        description: m.openGraph.description,
-        url: m.openGraph.url,
-        siteName: m.openGraph.siteName,
-      },
-      twitter: {
-        card: m.twitter.card,
-        title: m.twitter.title,
-        description: m.twitter.description,
-      },
-    };
-  } catch (error) {
-    console.error("⚠️ Metadata generation failed:", error);
-    return {
-      title: "Catalogue - Namakwala",
+      title: data?.title || "Catalogue - Namakwala",
       description:
-        "Explore and download Namakwala's complete product catalogue.",
+        data?.description || "Download our complete product catalogue.",
     };
   }
+
+  const meta = data.metadata;
+
+  return {
+    title: meta?.title || "Catalogue - Namakwala",
+    description: meta?.description || "Download our complete product catalogue.",
+    keywords: meta?.keywords || [],
+    openGraph: {
+      title: meta?.openGraph?.title || "Catalogue - Namakwala",
+      description:
+        meta?.openGraph?.description ||
+        "Download our complete product catalogue.",
+      url: meta?.openGraph?.url || undefined,
+      siteName: meta?.openGraph?.siteName || undefined,
+      images: [data.ogImage || "/optimized/fallback-image.jpg"],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: meta?.twitter?.title || "Catalogue - Namakwala",
+      description:
+        meta?.twitter?.description ||
+        "Download our complete product catalogue.",
+      images: [data.ogImage || "/optimized/fallback-image.jpg"],
+    },
+
+    // ⭐ Your required part:
+    additionalMetaTags: data.schema
+      ? [{ name: "ld+json", content: JSON.stringify(data.schema) }]
+      : [],
+  };
 }
 
 // ------------------------------
@@ -124,16 +138,12 @@ export default async function CataloguePage() {
 
   return (
     <section className="relative poppins">
-      {/* ✅ Page Banner */}
-      <div className="inset-0 top-0">
-        <PageBanner
-          title={page.banner.title}
-          category={page.banner.heading}
-          image={page.banner.image}
-        />
-      </div>
+      <PageBanner
+        title={page.banner.title}
+        category={page.banner.heading}
+        image={page.banner.image}
+      />
 
-      {/* ✅ Catalogue Client Section */}
       <CatalogueClient page={page} />
     </section>
   );

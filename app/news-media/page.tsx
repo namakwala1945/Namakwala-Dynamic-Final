@@ -1,50 +1,62 @@
 import PageBanner from "@/components/PageBanner";
 import NewsMediaTabs from "@/components/NewsMediaTabs";
-import Script from "next/script";
-import { Metadata as NextMetadata } from "next";
+import ContentRenderer from "@/components/ContentRenderer";
+import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
-const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || `${process.env.NEXT_PUBLIC_STRAPI_URL}`;
+// -------------------------------------
+// ⭐ DEFAULT FALLBACK CONSTANTS
+// -------------------------------------
+const FALLBACK = {
+  title: "News & Media",
+  description: [{ type: "paragraph", children: [{ text: "Content not available." }] }],
+  bannerImage: "/optimized/fallback-image.jpg",
+  emptyText: "Content not available",
+};
 
-/* -------------------------------------------------------------------------- */
-/* ✅ Force Dynamic Rendering (Prevents build error)                          */
-/* -------------------------------------------------------------------------- */
-export const dynamic = "force-dynamic"; // 👈 Add this line
-// This ensures the page is rendered dynamically and can safely use no-store fetch.
+// -------------------------------------
+// ⭐ FETCH NEWS & MEDIA DATA
+// -------------------------------------
+async function fetchNewsMediaData() {
+  const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL;
 
-/* -------------------------------------------------------------------------- */
-/* ✅ Fetch Data from Strapi                                                  */
-/* -------------------------------------------------------------------------- */
-async function getPageData() {
   try {
     const res = await fetch(
-      `${strapiUrl}/api/news-and-media?populate[Metadata][populate]=*&populate[pagebanner][populate]=*&populate[TypeOfMedia][populate][Media][populate]=*`,
-      { cache: "no-store" } // always fetch fresh (safe because of force-dynamic)
+      `${strapiUrl}/api/news-and-media?populate[Metadata][populate]=*&populate[PageSchema][populate]=*&populate[pagebanner][populate]=*&populate[TypeOfMedia][populate][Media][populate]=*`,
+      { cache: "no-store" }
     );
 
-    if (!res.ok) throw new Error("Failed to fetch data");
-    const json = await res.json();
-    const raw = json?.data;
+    const data = await res.json();
+    const raw = data?.data;
 
     if (!raw) return null;
 
-    const description =
-      raw?.description
-        ?.map((block: any) =>
-          block.children?.map((child: any) => child.text).join(" ")
-        )
-        .join(" ") || "";
-
     const banner = {
-      title: raw?.pagebanner?.title || "News & Media",
+      title: raw?.pagebanner?.title || FALLBACK.title,
       heading: raw?.pagebanner?.heading || "",
-      image: raw?.pagebanner?.image?.url
-        ? `${strapiUrl}${raw.pagebanner.image.url}`
-        : "/optimized/fallback-image.jpg",
+      image: raw?.pagebanner?.image?.url ? strapiUrl + raw.pagebanner.image.url : FALLBACK.bannerImage,
     };
 
+    const description = raw?.description || FALLBACK.description;
     const meta = raw?.Metadata || null;
+    const schemaData = raw?.PageSchema || null;
 
-    /* ------------------ 🧠 Dynamic Media Types (Tabs) ------------------- */
+    const schema = schemaData
+      ? {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: schemaData?.Name || FALLBACK.title,
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: schemaData?.RatingValue || 5,
+            ratingCount: schemaData?.RatingCount || 1,
+            reviewCount: schemaData?.ReviewCount || 1,
+          },
+        }
+      : null;
+
+    const ogImage = raw?.pagebanner?.image?.url ? strapiUrl + raw.pagebanner.image.url : FALLBACK.bannerImage;
+
     const mediaTypes =
       raw?.TypeOfMedia?.map((type: any) => ({
         id: type.id,
@@ -52,71 +64,73 @@ async function getPageData() {
         Media:
           type.Media?.map((m: any) => ({
             title: m.title || "Untitled",
-            url: m.URL || null, // Video URL
-            media:
-              m.media?.map((img: any) => ({
-                url: img?.url ? `${strapiUrl}${img.url}` : "/fallback-image.jpg",
-                alternativeText: img?.alternativeText || img?.name,
-              })) || [],
+            url: m.URL || null,
+            media: m.media?.map((img: any) => ({
+              url: img?.url ? strapiUrl + img.url : "/fallback-image.jpg",
+              alternativeText: img?.alternativeText || img?.name,
+            })) || [],
           })) || [],
       })) || [];
 
-    return { title: raw?.title, description, banner, meta, mediaTypes };
+    return { title: raw?.title || FALLBACK.title, description, banner, meta, schema, ogImage, mediaTypes };
   } catch (err) {
     console.error("❌ Error fetching News & Media:", err);
     return null;
   }
 }
 
-/* -------------------------------------------------------------------------- */
-/* ✅ Metadata Generator                                                      */
-/* -------------------------------------------------------------------------- */
-export async function generateMetadata(): Promise<NextMetadata> {
-  const data = await getPageData();
-  const meta = data?.meta;
+// -------------------------------------
+// ⭐ METADATA GENERATOR
+// -------------------------------------
+export async function generateMetadata({ params }: any) {
+  const data = await fetchNewsMediaData();
 
-  if (!meta)
+  if (!data || !data.meta) {
     return {
-      title: "News & Media | Namakwala",
-      description:
-        "Explore videos, image galleries, and media updates from Namakwala Group.",
+      title: FALLBACK.title,
+      description: data?.description?.map((b: any) => b.children?.map((c: any) => c.text).join(" ")).join(" ") || FALLBACK.emptyText,
     };
+  }
+
+  const meta = data.meta;
 
   return {
-    title: meta.title || "News & Media | Namakwala",
+    title: meta?.title || FALLBACK.title,
     description:
-      meta.description
-        ?.map((block: any) =>
-          block.children?.map((child: any) => child.text).join(" ")
-        )
-        .join(" ") || "",
+      meta?.description?.map((b: any) => b.children?.map((c: any) => c.text).join(" ")).join(" ") || FALLBACK.emptyText,
+    keywords: meta?.keywords || [],
+    openGraph: {
+      title: meta?.openGraph?.title || FALLBACK.title,
+      description:
+        meta?.openGraph?.description?.map((b: any) => b.children?.map((c: any) => c.text).join(" ")).join(" ") ||
+        FALLBACK.emptyText,
+      url: meta?.openGraph?.url || undefined,
+      siteName: meta?.openGraph?.siteName || undefined,
+      images: [data.ogImage || FALLBACK.bannerImage],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: meta?.twitter?.title || FALLBACK.title,
+      description:
+        meta?.twitter?.description?.map((b: any) => b.children?.map((c: any) => c.text).join(" ")).join(" ") ||
+        FALLBACK.emptyText,
+      images: [data.ogImage || FALLBACK.bannerImage],
+    },
+    additionalMetaTags: data.schema ? [{ name: "ld+json", content: JSON.stringify(data.schema) }] : [],
   };
 }
 
-/* -------------------------------------------------------------------------- */
-/* ✅ UI Component                                                            */
-/* -------------------------------------------------------------------------- */
+// -------------------------------------
+// ⭐ UI COMPONENT
+// -------------------------------------
 export default async function NewsMediaPage() {
-  const data = await getPageData();
+  const data = await fetchNewsMediaData();
   if (!data) return <p>Failed to load content.</p>;
 
   return (
     <section className="relative bg-[#fdf2df] poppins">
-      <Script type="application/ld+json" id="newsmedia-schema">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "WebPage",
-          name: data.title,
-          description: data.description,
-        })}
-      </Script>
-
       <div className="relative h-96 w-full overflow-hidden">
-        <PageBanner
-          title={data.banner?.title}
-          category={data.banner?.heading}
-          image={data.banner?.image}
-        />
+        <PageBanner title={data.banner.title} category={data.banner.heading} image={data.banner.image} />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-transparent"></div>
       </div>
 
@@ -125,9 +139,13 @@ export default async function NewsMediaPage() {
           <h2 className="text-4xl md:text-5xl playfair font-extrabold text-gradient mb-6 text-center">
             {data.title}
           </h2>
-          <p className="text-center text-gray-700 mb-8">{data.description}</p>
 
-          {/* ✅ Dynamic Tabs */}
+          {/* Render rich text description */}
+          <div className="text-center text-gray-700 mb-8">
+            <ContentRenderer content={data.description} />
+          </div>
+
+          {/* Dynamic Tabs */}
           <NewsMediaTabs mediaTypes={data.mediaTypes} />
         </div>
       </div>

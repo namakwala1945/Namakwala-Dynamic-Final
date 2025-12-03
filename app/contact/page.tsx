@@ -5,10 +5,12 @@ const STRAPI_URL =
   process.env.NEXT_PUBLIC_STRAPI_URL ??
   "https://your-strapi-url.com";
 
-// ---- Fetch Contact Data ----
+// -----------------------------
+// FETCH CONTACT DATA
+// -----------------------------
 async function fetchContactData() {
   const res = await fetch(
-    `${STRAPI_URL}/api/contact?populate[Metadata][populate]=*&populate[pagebanner][populate]=*&populate[Address][populate]=*`,
+    `${STRAPI_URL}/api/contact?populate[Metadata][populate]=*&populate[pagebanner][populate]=*&populate[PageSchema][populate]=*&populate[Address][populate]=*`,
     { cache: "no-store" }
   );
 
@@ -20,7 +22,9 @@ async function fetchContactData() {
   return json.data;
 }
 
-// ---- Page Metadata ----
+// -----------------------------
+// ⭐ METADATA GENERATOR
+// -----------------------------
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const data = await fetchContactData();
@@ -32,18 +36,22 @@ export async function generateMetadata(): Promise<Metadata> {
         meta.metaDescription ||
         "Get in touch with Namakwala for inquiries or support.",
       keywords: meta.metaKeywords || "contact, namakwala, salt, minerals",
+
       alternates: {
         canonical: meta.canonicalURL || "https://www.namakwala.in/contact",
       },
+
       openGraph: {
         title: meta.metaTitle || data.Title,
         description: meta.metaDescription,
         url: meta.canonicalURL || "https://www.namakwala.in/contact",
+        siteName: meta.siteName || "Namakwala",
         images: meta.metaImage?.url
           ? [`${STRAPI_URL}${meta.metaImage.url}`]
           : ["/default-og-image.jpg"],
         type: "website",
       },
+
       twitter: {
         card: "summary_large_image",
         title: meta.metaTitle || data.Title,
@@ -61,8 +69,25 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-// ---- Render Page ----
+// -----------------------------
+// PAGE RENDER WITH JSON-LD
+// -----------------------------
 export default async function ContactPage() {
   const data = await fetchContactData();
-  return <ContactClient pageData={data} />;
+  const schema = data?.PageSchema;
+
+  return (
+    <>
+      {/* ✅ JSON-LD (Schema) correctly injected */}
+      {schema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        />
+      )}
+
+      {/* Page Component */}
+      <ContactClient pageData={data} />
+    </>
+  );
 }
