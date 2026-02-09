@@ -10,7 +10,7 @@
     "lint": "next lint",
     "postbuild": "next-sitemap",
     "prepare": "echo Skipping Husky prepare step && husky install",
-     "test": "echo \"No tests yet\""
+    "test": "echo \"No tests yet\""
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
@@ -63,7 +63,7 @@
     "input-otp": "^1.4.2",
     "libphonenumber-js": "^1.10.39",
     "lucide-react": "^0.539.0",
-    "next": "^15.4.6",
+    "next": "^15.5.7",
     "next-i18next": "^15.4.2",
     "next-intl": "^4.3.5",
     "next-sitemap": "^4.2.3",
