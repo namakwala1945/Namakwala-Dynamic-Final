@@ -25,8 +25,12 @@ export default function Header() {
   const [fixed, setFixed] = useState(false);
   const [active, setActive] = useState<number | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [mobileSubOpen, setMobileSubOpen] = useState<Record<number, boolean>>({});
-  const [mobileInnerOpen, setMobileInnerOpen] = useState<Record<string, boolean>>({});
+  const [mobileSubOpen, setMobileSubOpen] = useState<Record<number, boolean>>(
+    {},
+  );
+  const [mobileInnerOpen, setMobileInnerOpen] = useState<
+    Record<string, boolean>
+  >({});
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -45,35 +49,40 @@ export default function Header() {
     closeTimer.current = setTimeout(() => setActive(null), 120);
   };
 
-  const toggleMobileSub = (i: number) => setMobileSubOpen(p => ({ ...p, [i]: !p[i] }));
+  const toggleMobileSub = (i: number) =>
+    setMobileSubOpen((p) => ({ ...p, [i]: !p[i] }));
   const toggleMobileInner = (outerIndex: number, innerIndex: number) => {
     const key = `${outerIndex}-${innerIndex}`;
-    setMobileInnerOpen(p => ({ ...p, [key]: !p[key] }));
+    setMobileInnerOpen((p) => ({ ...p, [key]: !p[key] }));
   };
 
   // Close mobile menu when any link is clicked
   const handleLinkClick = () => setMobileOpen(false);
 
   return (
-    <header className={`z-50 transition-all duration-300 py-1 poppins
-      ${fixed
-        ? "md:fixed md:top-0 md:left-0 md:w-full md:bg-white md:shadow-lg"
-        : "md:absolute md:w-full md:bg-gradient-to-r md:from-white/70 md:via-black/50 md:to-white/10 md:backdrop-blur-xs"
-      } bg-white md:bg-transparent`}>
-        <CustomCursor/>
+    <header
+      className={`z-50 transition-all duration-300 py-1 poppins
+      ${
+        fixed
+          ? "md:fixed md:top-0 md:left-0 md:w-full md:bg-white md:shadow-lg"
+          : "md:absolute md:w-full md:bg-gradient-to-r md:from-white/70 md:via-black/50 md:to-white/10 md:backdrop-blur-xs"
+      } bg-white md:bg-transparent`}
+    >
+      <CustomCursor />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
         {/* Logo */}
         <div className="flex-shrink-0">
           <Link href="/" onClick={handleLinkClick}>
-            <Image 
-            src="/namakwala-logo.png" 
-            alt="Namakwala" 
-            width={90}
-            height={90}
-            sizes="90px"
-            quality={90}
-            priority
-            className="object-contain" />
+            <Image
+              src="/namakwala-logo.png"
+              alt="Namakwala"
+              width={90}
+              height={90}
+              sizes="90px"
+              quality={90}
+              priority
+              className="object-contain"
+            />
           </Link>
         </div>
 
@@ -91,7 +100,9 @@ export default function Header() {
               className="cursor-pointer"
             >
               {item.megamenu ? (
-                <span className={`px-1 py-2 select-none ${active === i ? "text-primary" : ""}`}>
+                <span
+                  className={`px-1 py-2 select-none ${active === i ? "text-primary" : ""}`}
+                >
                   {item.name}
                 </span>
               ) : (
@@ -112,7 +123,7 @@ export default function Header() {
           {/* <LanguageSelector /> */}
           <button
             className="md:hidden p-2"
-            onClick={() => setMobileOpen(o => !o)}
+            onClick={() => setMobileOpen((o) => !o)}
             aria-label="Toggle menu"
           >
             {mobileOpen ? <FiX size={24} /> : <FiMenu size={24} />}
@@ -129,7 +140,10 @@ export default function Header() {
         >
           <div className="max-w-7xl mx-auto px-4 lg:px-4 py-6 flex justify-center gap-12 flex-wrap">
             {menuItems[active].content?.map((section, secIdx) => (
-              <div key={`section-${active}-${secIdx}`} className="min-w-[220px] text-center">
+              <div
+                key={`section-${active}-${secIdx}`}
+                className="min-w-[220px] text-center"
+              >
                 <Link
                   href={`/${section.slug}`}
                   className="block text-1xl uppercase mb-4 font-bold"
@@ -138,7 +152,7 @@ export default function Header() {
                   {section.title}
                 </Link>
                 <ul className="space-y-2">
-                  {section.categories?.map(cat => (
+                  {section.categories?.map((cat) => (
                     <li key={cat.slug}>
                       <Link
                         href={`/${section.slug}#${cat.slug}`}
@@ -167,13 +181,23 @@ export default function Header() {
           {/* Logo on left */}
           <div className="flex-shrink-0">
             <Link href="/" onClick={handleLinkClick}>
-              <Image src="/namakwala-logo.png" alt="Namakwala" width={90} height={90} className="object-contain" />
+              <Image
+                src="/namakwala-logo.png"
+                alt="Namakwala"
+                width={90}
+                height={90}
+                className="object-contain"
+              />
             </Link>
           </div>
 
           {/* Close button on right */}
           <div>
-            <button  aria-label="Open menu" onClick={() => setMobileOpen(false)} className="p-2">
+            <button
+              aria-label="Open menu"
+              onClick={() => setMobileOpen(false)}
+              className="p-2"
+            >
               <FiX size={28} />
             </button>
           </div>
@@ -183,16 +207,35 @@ export default function Header() {
           {menuItems.map((item, i) => (
             <div key={`mobile-${i}`}>
               <div className="flex items-center justify-between">
-                <Link
-                  href={item.link || "#"}
-                  className="block py-2 font-semibold"
-                  onClick={handleLinkClick}
-                >
-                  {item.name}
-                </Link>
+                {item.megamenu ? (
+                  <button
+                    type="button"
+                    className="block py-2 font-semibold text-left w-full"
+                    onClick={() => toggleMobileSub(i)}
+                  >
+                    {item.name}
+                  </button>
+                ) : (
+                  <Link
+                    href={item.link || "#"}
+                    className="block py-2 font-semibold"
+                    onClick={handleLinkClick}
+                  >
+                    {item.name}
+                  </Link>
+                )}
+
                 {item.megamenu && (
-                  <button  aria-label="Open menu" className="p-1" onClick={() => toggleMobileSub(i)}>
-                    {mobileSubOpen[i] ? <FiChevronUp size={20} /> : <FiChevronDown size={20} />}
+                  <button
+                    aria-label="Open menu"
+                    className="p-1"
+                    onClick={() => toggleMobileSub(i)}
+                  >
+                    {mobileSubOpen[i] ? (
+                      <FiChevronUp size={20} />
+                    ) : (
+                      <FiChevronDown size={20} />
+                    )}
                   </button>
                 )}
               </div>
@@ -209,31 +252,37 @@ export default function Header() {
                         >
                           {section.title}
                         </Link>
-                        {section.categories && section.categories.length > 0 && (
-                          <button  aria-label="Open menu" className="p-1" onClick={() => toggleMobileInner(i, secIdx)}>
-                            {mobileInnerOpen[`${i}-${secIdx}`] ? (
-                              <FiChevronUp size={18} />
-                            ) : (
-                              <FiChevronDown size={18} />
-                            )}
-                          </button>
-                        )}
+                        {section.categories &&
+                          section.categories.length > 0 && (
+                            <button
+                              aria-label="Open menu"
+                              className="p-1"
+                              onClick={() => toggleMobileInner(i, secIdx)}
+                            >
+                              {mobileInnerOpen[`${i}-${secIdx}`] ? (
+                                <FiChevronUp size={18} />
+                              ) : (
+                                <FiChevronDown size={18} />
+                              )}
+                            </button>
+                          )}
                       </div>
 
-                      {section.categories && mobileInnerOpen[`${i}-${secIdx}`] && (
-                        <div className="pl-4 pt-1 space-y-1">
-                          {section.categories.map(cat => (
-                            <Link
-                              key={`${i}-${secIdx}-${cat.slug}`}
-                              href={`/${section.slug}#${cat.slug}`}
-                              className="block text-sm capitalize"
-                              onClick={handleLinkClick}
-                            >
-                              {cat.title}
-                            </Link>
-                          ))}
-                        </div>
-                      )}
+                      {section.categories &&
+                        mobileInnerOpen[`${i}-${secIdx}`] && (
+                          <div className="pl-4 pt-1 space-y-1">
+                            {section.categories.map((cat) => (
+                              <Link
+                                key={`${i}-${secIdx}-${cat.slug}`}
+                                href={`/${section.slug}#${cat.slug}`}
+                                className="block text-sm capitalize"
+                                onClick={handleLinkClick}
+                              >
+                                {cat.title}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
                     </div>
                   ))}
                 </div>
@@ -242,8 +291,6 @@ export default function Header() {
           ))}
         </div>
       </div>
-
-
     </header>
   );
 }

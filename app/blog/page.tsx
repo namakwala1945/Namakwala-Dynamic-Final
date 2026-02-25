@@ -11,7 +11,7 @@ async function getBlogPageData() {
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/blog-pages?populate[Metadata][populate]=*&populate[pagebanner][populate]=*`,
-      { next: { revalidate: 60 } }
+      { next: { revalidate: 60 } },
     );
     if (!res.ok) throw new Error("Failed to fetch blog page data");
     const { data } = await res.json();
@@ -26,8 +26,8 @@ async function getBlogPageData() {
 async function getBlogsData() {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/blogs?populate[Metadata][populate]=*&populate[pagebanner][populate]=*`,
-      { next: { revalidate: 60 } }
+      `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/blogs?populate[Metadata][populate]=*&populate[pagebanner][populate]=*&populate[country][populate]=*`,
+      { next: { revalidate: 60 } },
     );
     if (!res.ok) throw new Error("Failed to fetch blogs");
     const { data } = await res.json();
@@ -53,19 +53,15 @@ export async function generateMetadata(): Promise<NextMetadata> {
     keywords: meta.keywords,
     openGraph: {
       title: meta.openGraph?.title,
-      description:
-        meta.openGraph?.description?.[0]?.children?.[0]?.text || "",
+      description: meta.openGraph?.description?.[0]?.children?.[0]?.text || "",
       url: meta.openGraph?.url || "https://www.namakwala.in/blog",
       siteName: meta.openGraph?.siteName || "Namakwala",
-      images: [
-        getStrapiMedia(meta.metaImage?.url) || "/default-og-image.jpg",
-      ],
+      images: [getStrapiMedia(meta.metaImage?.url) || "/default-og-image.jpg"],
     },
     twitter: {
       card: meta.twitter?.card || "summary_large_image",
       title: meta.twitter?.title,
-      description:
-        meta.twitter?.description?.[0]?.children?.[0]?.text || "",
+      description: meta.twitter?.description?.[0]?.children?.[0]?.text || "",
     },
   };
 }
@@ -90,7 +86,9 @@ export default async function BlogPage() {
     <section className="relative poppins bg-[#efefef]">
       <PageBanner
         title={banner?.title || "Blog"}
-        image={getStrapiMedia(banner?.image?.url) || "/optimized/fallback-image.jpg"}
+        image={
+          getStrapiMedia(banner?.image?.url) || "/optimized/fallback-image.jpg"
+        }
         category={banner?.heading || "Blog"}
       />
 
@@ -100,20 +98,27 @@ export default async function BlogPage() {
         </h1>
 
         {/* ⭐ WOW Blog Grid */}
-        <div className="
+        <div
+          className="
           grid 
           sm:grid-cols-2 
           lg:grid-cols-3 
           xl:grid-cols-4 
           gap-10 
           mt-8
-        ">
+        "
+        >
           {blogs.length > 0 ? (
             blogs.map((post: any) => {
               const imgUrl = getStrapiMedia(post.pagebanner?.image?.url);
-
+              const countrySlug = post.country?.Slug;
+              const blogSlug = post.slug;
+              const dynamicHref = countrySlug
+                ? `/${countrySlug}/${blogSlug}.html`
+                : `/${blogSlug}.html`;
+              console.log(countrySlug, blogSlug);
               return (
-                <Link key={post.documentId} href={`/${post.slug}.html`}>
+                <Link key={post.documentId} href={`${dynamicHref}`}>
                   <div
                     className="
                       group cursor-pointer overflow-hidden 
@@ -126,15 +131,17 @@ export default async function BlogPage() {
                   >
                     {/* IMAGE */}
                     <div className="relative h-52 w-full overflow-hidden">
-                      <div className="
+                      <div
+                        className="
                         absolute inset-0 
                         bg-gradient-to-t from-black/40 via-black/10 to-transparent 
                         opacity-0 group-hover:opacity-100 
                         transition-opacity duration-500
-                      "></div>
+                      "
+                      ></div>
 
                       <Image
-                        src={imgUrl || '/optimized/fallback-image.jpg'}
+                        src={imgUrl || "/optimized/fallback-image.jpg"}
                         alt={post.title}
                         width={800}
                         height={500}
@@ -185,10 +192,11 @@ export default async function BlogPage() {
               );
             })
           ) : (
-            <p className="text-center text-gray-600 col-span-full">No blogs found.</p>
+            <p className="text-center text-gray-600 col-span-full">
+              No blogs found.
+            </p>
           )}
         </div>
-
       </div>
     </section>
   );

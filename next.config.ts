@@ -19,13 +19,15 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "apeda.gov.in" },
 
       {
-        protocol: "https",
-        hostname: "admin.namakwala.in",
+        protocol: "http",
+        hostname: "localhost",
+        port: "1337",
         pathname: "/uploads/**",
       },
       {
-        protocol: "https",
-        hostname: "admin.namakwala.in",
+        protocol: "http",
+        hostname: "localhost",
+        port: "1337",
         pathname: "/optimized/**",
       },
     ],
@@ -41,6 +43,10 @@ const nextConfig: NextConfig = {
 
   async rewrites() {
     return [
+      {
+        source: "/:country/:slug.html",
+        destination: "/blog/:slug",
+      },
       {
         source: "/:slug.html",
         destination: "/blog/:slug",
