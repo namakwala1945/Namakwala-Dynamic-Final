@@ -9,14 +9,18 @@ interface PageBannerProps {
   priority?: boolean;
 }
 
-export default function PageBanner({ title, image, category }: PageBannerProps) {
+export default function PageBanner({
+  title,
+  image,
+  category,
+}: PageBannerProps) {
   if (!image) return null;
 
   // ✅ use helper to safely convert Strapi image URL
   const imageUrl = getStrapiMedia(image);
 
   return (
-    <div className="group relative w-full h-64 md:h-80 bg-gray-100 flex items-center justify-center overflow-hidden shadow-md">
+    <div className="blog-banner group relative w-full h-64 md:h-80 bg-gray-100 flex items-center justify-center overflow-hidden shadow-md">
       {/* Background Image */}
       <Image
         src={imageUrl || ""}

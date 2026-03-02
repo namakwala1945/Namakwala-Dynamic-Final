@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { getStrapiMedia } from "@/lib/media";
 import ContentRenderer from "../../../components/ContentRenderer";
-
+import "./singleBlog.css";
 // ----------------------
 // Fetch Blog by Slug
 // ----------------------
@@ -12,7 +12,7 @@ async function getBlogData(slug: string) {
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/blogs?filters[slug][$eq]=${slug}&populate[Metadata][populate]=*&populate[PageSchema][populate]=*&populate[pagebanner][populate]=*`,
-      { next: { revalidate: 60 } }
+      { next: { revalidate: 60 } },
     );
     if (!res.ok) throw new Error("Failed to fetch single blog");
     const { data } = await res.json();
@@ -30,13 +30,14 @@ async function getAllBlogs() {
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/blogs?populate[pagebanner][populate]=*`,
-      { next: { revalidate: 60 } }
+      { next: { revalidate: 60 } },
     );
     const { data } = await res.json();
 
     return data.sort(
       (a: any, b: any) =>
-        new Date(b.PublishedDate).getTime() - new Date(a.PublishedDate).getTime()
+        new Date(b.PublishedDate).getTime() -
+        new Date(a.PublishedDate).getTime(),
     );
   } catch (e) {
     console.log(e);
@@ -63,7 +64,11 @@ export async function generateStaticParams() {
 // ----------------------
 // Metadata with JSON-LD
 // ----------------------
-export async function generateMetadata({ params }: { params: { slug: string } }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}) {
   const { slug } = params;
   const blog = await getBlogData(slug);
   if (!blog) return {};
@@ -125,7 +130,11 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 // ----------------------
 // Blog Detail Page
 // ----------------------
-export default async function BlogDetailPage({ params }: { params: { slug: string } }) {
+export default async function BlogDetailPage({
+  params,
+}: {
+  params: { slug: string };
+}) {
   const { slug } = params;
   const blog = await getBlogData(slug);
   const blogs = await getAllBlogs();
@@ -135,9 +144,8 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
   const prevBlog = blogs[index + 1] || null;
   const nextBlog = blogs[index - 1] || null;
   const banner = blog.pagebanner;
-
   return (
-    <section className="relative poppins">
+    <section className="relative poppins blog-details">
       <PageBanner
         title={banner?.title || blog.title}
         image={
@@ -148,18 +156,23 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
         category="Blog"
       />
 
-      <div className="w-auto bg-[#d2ab67] mx-auto px-6 py-12 space-y-24">
+      <div className="w-auto bg-[#d2ab67] mx-auto px-6 py-12 space-y-24 blog-details-section">
         <div className="container bg-white mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* LEFT SIDE */}
           <div className="lg:col-span-8">
-            <h1 className="text-4xl mb-4 playfair text-gradient font-extrabold">{blog.title}</h1>
+            <h1 className="text-4xl mb-4 playfair text-gradient font-extrabold">
+              {blog.title}
+            </h1>
             <hr className="mb-4" />
             <div className="prose prose-lg max-w-full text-justify">
               <ContentRenderer content={blog.content} />
             </div>
             <div className="mt-4 text-gray-600 text-sm text-right">
-              By <span className="text-gradient font-extrabold">{blog.AuthorName}</span> •{" "}
-              {new Date(blog.PublishedDate).toLocaleDateString()}
+              By{" "}
+              <span className="text-gradient font-extrabold">
+                {blog.AuthorName}
+              </span>{" "}
+              • {new Date(blog.PublishedDate).toLocaleDateString()}
             </div>
 
             {/* NEXT / PREVIOUS */}
@@ -190,14 +203,17 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
 
           {/* RIGHT SIDE – Latest Blogs */}
           <div className="lg:col-span-4">
-            <h2 className="text-3xl mb-4 playfair text-gradient font-extrabold">Latest Blogs</h2>
+            <h2 className="text-3xl mb-4 playfair text-gradient font-extrabold">
+              Latest Blogs
+            </h2>
             <hr className="mb-4 border-gray-300" />
             <div className="flex flex-col gap-2">
               {blogs.slice(0, 6).map((post: any) => {
                 const imgUrl = getStrapiMedia(
                   post.pagebanner?.image?.url ||
-                    post.pagebanner?.data?.attributes?.image?.data?.attributes?.url ||
-                    post.pagebanner?.data?.attributes?.url
+                    post.pagebanner?.data?.attributes?.image?.data?.attributes
+                      ?.url ||
+                    post.pagebanner?.data?.attributes?.url,
                 );
                 return (
                   <a
@@ -218,8 +234,12 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
                       <h3 className="text-gray-900 playfair font-semibold text-base hover:text-orange-500 transition-colors duration-300 line-clamp-2">
                         {post.title}
                       </h3>
-                      <p className="text-gray-600 text-sm mt-1 line-clamp-2">{post.Excerpt || post.short_description || ""}</p>
-                      <p className="text-gray-500 text-xs mt-0.5">{new Date(post.PublishedDate).toLocaleDateString()}</p>
+                      <p className="text-gray-600 text-sm mt-1 line-clamp-2">
+                        {post.Excerpt || post.short_description || ""}
+                      </p>
+                      <p className="text-gray-500 text-xs mt-0.5">
+                        {new Date(post.PublishedDate).toLocaleDateString()}
+                      </p>
                     </div>
                   </a>
                 );
