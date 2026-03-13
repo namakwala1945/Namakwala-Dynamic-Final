@@ -6,7 +6,7 @@ import { Providers } from "./providers";
 import ClientComponents from "./ClientComponents";
 import { Playfair_Display, Poppins } from "next/font/google";
 import PageSchemaScript from "@/components/PageSchemaScript";
-
+import { GoogleAnalytics } from "@next/third-parties/google";
 // Fonts
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -29,7 +29,11 @@ export const metadata: Metadata = {
     "NAMAKWALA – The Best Salt's Exporter in India & Best Mineral's Exporter in India, delivering pure, high-quality salts & minerals worldwide with trust.",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
       <head>
@@ -37,12 +41,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           name="viewport"
           content="width=device-width, initial-scale=1, viewport-fit=cover"
         />
-        <PageSchemaScript schema={{
-          Name: "Namakwala",
-          RatingValue: 4.8,
-          RatingCount: 28916,
-          ReviewCount: 50
-        }} />
+        <PageSchemaScript
+          schema={{
+            Name: "Namakwala",
+            RatingValue: 4.8,
+            RatingCount: 28916,
+            ReviewCount: 50,
+          }}
+        />
       </head>
 
       <body
@@ -52,6 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Header />
         <Providers>{children}</Providers>
         <Footer />
+        <GoogleAnalytics gaId="G-KHLPFW7673" />
       </body>
     </html>
   );
