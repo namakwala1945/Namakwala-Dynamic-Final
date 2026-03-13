@@ -27,6 +27,7 @@ pm2.log
 .env.production
 .env.test
 
+
 # Strapi specific (optional)
 .tmp/
 .uploads/

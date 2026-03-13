@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 60,
     deviceSizes: [320, 640, 768, 1024, 1200, 1600],
 
-    domains: ["images.unsplash.com", "img.youtube.com"],
+    domains: ["images.unsplash.com", "img.youtube.com", "admin.namakwala.com"],
 
     remotePatterns: [
       { protocol: "https", hostname: "picsum.photos" },
@@ -24,10 +24,16 @@ const nextConfig: NextConfig = {
         port: "1337",
         pathname: "/uploads/**",
       },
+
       {
-        protocol: "http",
-        hostname: "localhost",
-        port: "1337",
+        protocol: "https",
+        hostname: "admin.namakwala.com",
+        pathname: "/uploads/**",
+      },
+
+      {
+        protocol: "https",
+        hostname: "admin.namakwala.com",
         pathname: "/optimized/**",
       },
     ],
