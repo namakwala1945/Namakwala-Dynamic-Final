@@ -157,7 +157,7 @@ export default async function BlogPage() {
                     <div className="p-5 flex flex-col flex-grow">
                       <h2
                         className="
-                          text-[20px] font-bold text-gray-900 leading-tight 
+                          text-[20px] font-bold text-gray-900 leading-tight break-words
                           group-hover:text-orange-500 
                           transition-colors duration-400
                         "
