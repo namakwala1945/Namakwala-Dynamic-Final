@@ -226,6 +226,19 @@
               "description": "Calcined kaolin is produced by heating natural kaolin, enhancing brightness and chemical resistance. It is used in paper, paints, plastics, and rubber industries."
             }
           ]
+        },
+        {
+          "title": "Barite",
+          "slug": "barite",
+          "products": [
+            {
+              "title": "Barite",
+              "slug": "Barite",
+              "image": "/images/products/calcined-kaolin-large.webp",
+              "shortDescription": "",
+              "description": ""
+            }
+          ]
         }
       ]
     }
