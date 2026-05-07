@@ -188,9 +188,9 @@ export default async function BlogPage({ searchParams }: any) {
               type="submit"
               className="
                 px-5
-                bg-orange-500
                 text-white
-                hover:bg-orange-600
+                shadow-lg bg-[#d2ab67] 
+                hover:bg-[#946f41]
                 transition
               "
             >
@@ -317,8 +317,8 @@ export default async function BlogPage({ searchParams }: any) {
                         transition
                         ${
                           currentPage === page
-                            ? "bg-orange-500 text-white border-orange-500"
-                            : "bg-white hover:bg-orange-100"
+                            ? "shadow-lg bg-[#d2ab67] text-white border-[#d2ab67]"
+                            : "bg-white hover:bg-[#946f41]"
                         }
                       `}
                     >
