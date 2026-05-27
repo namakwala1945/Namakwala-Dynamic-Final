@@ -371,3 +371,32 @@ html, body {
   100% { transform: translateX(100%); }
 }
 .animate-shimmer { animation: shimmer 1.2s infinite; }
+.footer-bg{
+  bottom: 50px;
+  max-width: none;
+  position: relative;
+}
+.primary-text{
+  color: #b8922e
+}
+.primary-bg{
+  background-color: #b8922e;
+}
+.blog-card-footer{
+  display: block;
+  text-align: center;
+  width: 100%;
+}
+.blog-details .blog-details-section h1 {
+  line-height: 2.95rem;
+}
+.blog-details .blog-details-section h2 {
+  font-weight: 800;
+  font-size: 1.5rem;
+  line-height: 2.5rem;
+}
+.blog-details .blog-details-section h3 {
+  font-weight: 800;
+  font-size: 1rem;
+  line-height: 1rem;
+}

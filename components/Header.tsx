@@ -25,39 +25,75 @@ export default function Header() {
   const [fixed, setFixed] = useState(false);
   const [active, setActive] = useState<number | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [mobileSubOpen, setMobileSubOpen] = useState<Record<number, boolean>>(
-    {},
-  );
+
+  const [mobileSubOpen, setMobileSubOpen] = useState<
+    Record<number, boolean>
+  >({});
+
   const [mobileInnerOpen, setMobileInnerOpen] = useState<
     Record<string, boolean>
   >({});
+
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const handleScroll = () => setFixed(window.scrollY > 10);
+
     window.addEventListener("scroll", handleScroll);
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const open = (i: number) => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
+
     setActive(i);
   };
 
   const scheduleClose = () => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
+
     closeTimer.current = setTimeout(() => setActive(null), 120);
   };
 
   const toggleMobileSub = (i: number) =>
-    setMobileSubOpen((p) => ({ ...p, [i]: !p[i] }));
-  const toggleMobileInner = (outerIndex: number, innerIndex: number) => {
+    setMobileSubOpen((p) => ({
+      ...p,
+      [i]: !p[i],
+    }));
+
+  const toggleMobileInner = (
+    outerIndex: number,
+    innerIndex: number
+  ) => {
     const key = `${outerIndex}-${innerIndex}`;
-    setMobileInnerOpen((p) => ({ ...p, [key]: !p[key] }));
+
+    setMobileInnerOpen((p) => ({
+      ...p,
+      [key]: !p[key],
+    }));
   };
 
-  // Close mobile menu when any link is clicked
+  // Close mobile menu
   const handleLinkClick = () => setMobileOpen(false);
+
+  // Alphabetical Sort Function
+  const sortAlphabetically = <
+    T extends { title?: string; name?: string }
+  >(
+    arr: T[] = []
+  ) => {
+    return [...arr].sort((a, b) => {
+      const first = (a.title || a.name || "").toLowerCase();
+
+      const second = (b.title || b.name || "").toLowerCase();
+
+      return first.localeCompare(second, undefined, {
+        numeric: true,
+        sensitivity: "base",
+      });
+    });
+  };
 
   return (
     <header
@@ -69,10 +105,14 @@ export default function Header() {
       } bg-white md:bg-transparent`}
     >
       <CustomCursor />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
+
         {/* Logo */}
         <div className="flex-shrink-0">
+
           <Link href="/" onClick={handleLinkClick}>
+
             <Image
               src="/namakwala-logo.png"
               alt="Namakwala"
@@ -83,7 +123,9 @@ export default function Header() {
               priority
               className="object-contain"
             />
+
           </Link>
+
         </div>
 
         {/* Desktop nav */}
@@ -94,56 +136,82 @@ export default function Header() {
           onMouseLeave={scheduleClose}
         >
           {menuItems.map((item, i) => (
+
             <div
               key={`desktop-${i}`}
-              onMouseEnter={() => (item.megamenu ? open(i) : setActive(null))}
+              onMouseEnter={() =>
+                item.megamenu ? open(i) : setActive(null)
+              }
               className="cursor-pointer"
             >
+
               {item.megamenu ? (
+
                 <span
-                  className={`px-1 py-2 select-none ${active === i ? "text-primary" : ""}`}
+                  className={`px-1 py-2 select-none ${
+                    active === i ? "text-primary" : ""
+                  }`}
                 >
                   {item.name}
                 </span>
+
               ) : (
+
                 <Link
                   href={item.link || "#"}
-                  className={`px-1 py-2 hover:text-primary ${active === i ? "text-primary" : ""}`}
+                  className={`px-1 py-2 hover:text-primary ${
+                    active === i ? "text-primary" : ""
+                  }`}
                   onClick={handleLinkClick}
                 >
                   {item.name}
                 </Link>
+
               )}
             </div>
           ))}
         </nav>
 
-        {/* Language + Burger */}
+        {/* Right side */}
         <div className="ml-auto flex items-center gap-3">
+
           {/* <LanguageSelector /> */}
+
           <button
             className="md:hidden p-2"
             onClick={() => setMobileOpen((o) => !o)}
             aria-label="Toggle menu"
           >
-            {mobileOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+            {mobileOpen ? (
+              <FiX size={24} />
+            ) : (
+              <FiMenu size={24} />
+            )}
           </button>
+
         </div>
       </div>
 
-      {/* Desktop mega menu */}
+      {/* Desktop Mega Menu */}
       {active !== null && menuItems?.[active]?.megamenu && (
+
         <div
           className="absolute text-black inset-x-0 top-full bg-white shadow-xl border-t"
           onMouseEnter={() => open(active)}
           onMouseLeave={scheduleClose}
         >
+
           <div className="max-w-7xl mx-auto px-4 lg:px-4 py-6 flex justify-center gap-12 flex-wrap">
-            {menuItems[active].content?.map((section, secIdx) => (
+
+            {sortAlphabetically(
+              menuItems[active].content
+            ).map((section, secIdx) => (
+
               <div
                 key={`section-${active}-${secIdx}`}
                 className="min-w-[220px] text-center"
               >
+
                 <Link
                   href={`/${section.slug}`}
                   className="block text-1xl uppercase mb-4 font-bold"
@@ -151,9 +219,15 @@ export default function Header() {
                 >
                   {section.title}
                 </Link>
+
                 <ul className="space-y-2">
-                  {section.categories?.map((cat) => (
+
+                  {sortAlphabetically(
+                    section.categories
+                  ).map((cat) => (
+
                     <li key={cat.slug}>
+
                       <Link
                         href={`/${section.slug}#${cat.slug}`}
                         className="block text-sm capitalize"
@@ -161,26 +235,33 @@ export default function Header() {
                       >
                         {cat.title}
                       </Link>
+
                     </li>
                   ))}
                 </ul>
+
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Mobile menu */}
+      {/* Mobile Menu */}
       <div
         className={`md:hidden fixed inset-0 z-50 bg-white text-black shadow-lg overflow-auto transition-transform duration-300 transform ${
-          mobileOpen ? "translate-y-0" : "-translate-y-full"
+          mobileOpen
+            ? "translate-y-0"
+            : "-translate-y-full"
         }`}
       >
-        {/* Header with logo and close button */}
+
+        {/* Mobile Header */}
         <div className="flex items-center justify-between px-4 pt-4 pb-2 border-b">
-          {/* Logo on left */}
+
           <div className="flex-shrink-0">
+
             <Link href="/" onClick={handleLinkClick}>
+
               <Image
                 src="/namakwala-logo.png"
                 alt="Namakwala"
@@ -188,26 +269,35 @@ export default function Header() {
                 height={90}
                 className="object-contain"
               />
+
             </Link>
+
           </div>
 
-          {/* Close button on right */}
           <div>
+
             <button
-              aria-label="Open menu"
+              aria-label="Close menu"
               onClick={() => setMobileOpen(false)}
               className="p-2"
             >
               <FiX size={28} />
             </button>
+
           </div>
         </div>
 
+        {/* Mobile Menu Items */}
         <div className="pt-4 px-4 space-y-3">
+
           {menuItems.map((item, i) => (
+
             <div key={`mobile-${i}`}>
+
               <div className="flex items-center justify-between">
+
                 {item.megamenu ? (
+
                   <button
                     type="button"
                     className="block py-2 font-semibold text-left w-full"
@@ -215,7 +305,9 @@ export default function Header() {
                   >
                     {item.name}
                   </button>
+
                 ) : (
+
                   <Link
                     href={item.link || "#"}
                     className="block py-2 font-semibold"
@@ -223,9 +315,11 @@ export default function Header() {
                   >
                     {item.name}
                   </Link>
+
                 )}
 
                 {item.megamenu && (
+
                   <button
                     aria-label="Open menu"
                     className="p-1"
@@ -237,14 +331,23 @@ export default function Header() {
                       <FiChevronDown size={20} />
                     )}
                   </button>
+
                 )}
               </div>
 
+              {/* Mobile Submenu */}
               {item.megamenu && mobileSubOpen[i] && (
+
                 <div className="pl-4 pt-2 space-y-2">
-                  {item.content?.map((section, secIdx) => (
+
+                  {sortAlphabetically(
+                    item.content
+                  ).map((section, secIdx) => (
+
                     <div key={`mob-section-${i}-${secIdx}`}>
+
                       <div className="flex items-center justify-between">
+
                         <Link
                           href={`/${section.slug}`}
                           className="block text-1xl uppercase mb-2"
@@ -252,26 +355,40 @@ export default function Header() {
                         >
                           {section.title}
                         </Link>
+
                         {section.categories &&
                           section.categories.length > 0 && (
+
                             <button
-                              aria-label="Open menu"
+                              aria-label="Open submenu"
                               className="p-1"
-                              onClick={() => toggleMobileInner(i, secIdx)}
+                              onClick={() =>
+                                toggleMobileInner(i, secIdx)
+                              }
                             >
-                              {mobileInnerOpen[`${i}-${secIdx}`] ? (
+                              {mobileInnerOpen[
+                                `${i}-${secIdx}`
+                              ] ? (
                                 <FiChevronUp size={18} />
                               ) : (
                                 <FiChevronDown size={18} />
                               )}
                             </button>
+
                           )}
                       </div>
 
                       {section.categories &&
-                        mobileInnerOpen[`${i}-${secIdx}`] && (
+                        mobileInnerOpen[
+                          `${i}-${secIdx}`
+                        ] && (
+
                           <div className="pl-4 pt-1 space-y-1">
-                            {section.categories.map((cat) => (
+
+                            {sortAlphabetically(
+                              section.categories
+                            ).map((cat) => (
+
                               <Link
                                 key={`${i}-${secIdx}-${cat.slug}`}
                                 href={`/${section.slug}#${cat.slug}`}
@@ -280,12 +397,15 @@ export default function Header() {
                               >
                                 {cat.title}
                               </Link>
+
                             ))}
                           </div>
+
                         )}
                     </div>
                   ))}
                 </div>
+
               )}
             </div>
           ))}

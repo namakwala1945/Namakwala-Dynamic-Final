@@ -41,7 +41,7 @@ async function fetchPageBySlug(slug: string) {
 // ⭐ DYNAMIC METADATA
 // -------------------------------------
 export async function generateMetadata({ params }: any) {
-  const category = params.category;
+  const category = params.slug;
 
   // Fetch page data
   const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL;
@@ -206,7 +206,7 @@ async function fetchCategoryData(category: string): Promise<{
 // ⭐ CATEGORY PAGE COMPONENT
 // -------------------------------------
 export default async function CategoryPage({ params }: any) {
-  const category = params.category;
+  const category = params.slug;
 
   const { products, banner } = await fetchCategoryData(category);
 
