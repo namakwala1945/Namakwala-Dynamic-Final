@@ -38,19 +38,29 @@ export default async function CountryPage({
 
   return (
     <section className="relative poppins bg-[#efefef] min-h-screen">
-      <div className="bg-[#111] py-20">
-        <div className="container mx-auto px-6">
-          <h1 className="text-5xl md:text-6xl text-white playfair uppercase">
-            {params.country}
-          </h1>
+      <div className="relative py-24 overflow-hidden">
+  <Image
+    src="/assets/country-blog.png"
+    alt="Country Banner"
+    fill
+    priority
+    className="object-cover"
+  />
 
-          <div className="w-24 h-[2px] bg-[#d2ab67] mt-4"></div>
+  <div className="absolute inset-0 bg-black/60"></div>
 
-          <p className="text-gray-300 mt-4">
-            Total Blogs: {blogs.length}
-          </p>
-        </div>
-      </div>
+  <div className="relative z-10 container mx-auto px-6">
+    <h1 className="text-5xl md:text-6xl text-white playfair uppercase">
+      {params.country}
+    </h1>
+
+    <div className="w-24 h-[2px] bg-[#d2ab67] mt-4"></div>
+
+    <p className="text-gray-200 mt-4 text-lg">
+      Total Blogs: {blogs.length}
+    </p>
+  </div>
+</div>
 
       <div className="container mx-auto px-6 py-16">
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">

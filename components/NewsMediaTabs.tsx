@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Image from "next/image";
-import { getStrapiMedia } from "@/lib/media"; // ✅ ADDED
+import { getStrapiMedia } from "@/lib/media";
 
 interface MediaFile {
   url: string;
@@ -11,7 +11,7 @@ interface MediaFile {
 
 interface MediaItem {
   title: string;
-  url?: string; // YouTube or direct video url
+  url?: string;
   media?: MediaFile[];
 }
 
@@ -25,41 +25,53 @@ interface NewsMediaTabsProps {
   mediaTypes: MediaType[];
 }
 
-export default function NewsMediaTabs({ mediaTypes = [] }: NewsMediaTabsProps) {
+export default function NewsMediaTabs({
+  mediaTypes = [],
+}: NewsMediaTabsProps) {
   const [activeTab, setActiveTab] = useState(mediaTypes[0]?.id ?? 0);
   const [isOpen, setIsOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // -------------------------------------------------
-  // 🚀 Compute Active Media (Fast + Strapi URL Fix)
-  // -------------------------------------------------
   const activeMedia = useMemo(() => {
     const type = mediaTypes.find((t) => t.id === activeTab);
+
     if (!type) return [];
 
     return (
       type.Media?.flatMap((m) => {
         const items: any[] = [];
 
-        // 🎥 Direct YouTube / Video URL
+        // External URL
         if (m.url) {
           items.push({
             type: "video",
             url: m.url,
-            title: m.title || "Untitled Video",
+            title: m.title || "Video",
+            isYoutube: true,
           });
         }
 
-        // 🖼️ Uploaded Media
+        // Uploaded Media
         if (m.media?.length) {
           m.media.forEach((file) => {
-            const fixedUrl = getStrapiMedia(file.url); // <-- FIXED URL
-            const isVideo = fixedUrl?.match(/\.(mp4|mov|webm)$/i);
+            const fixedUrl = getStrapiMedia(file.url);
+
+            const lowerUrl = fixedUrl?.toLowerCase() || "";
+
+            const isVideo =
+              lowerUrl.includes(".mp4") ||
+              lowerUrl.includes(".webm") ||
+              lowerUrl.includes(".mov") ||
+              lowerUrl.includes(".ogg");
 
             items.push({
               type: isVideo ? "video" : "image",
-              url: fixedUrl || "",
-              title: file.alternativeText || m.title || "Untitled",
+              url: fixedUrl,
+              title:
+                file.alternativeText ||
+                m.title ||
+                "Untitled",
+              isYoutube: false,
             });
           });
         }
@@ -69,48 +81,47 @@ export default function NewsMediaTabs({ mediaTypes = [] }: NewsMediaTabsProps) {
     );
   }, [mediaTypes, activeTab]);
 
-  // -------------------------------------------------
-  // Lightbox Functions
-  // -------------------------------------------------
-  const openLightbox = (idx: number) => {
-    setCurrentIndex(idx);
+  const openLightbox = (index: number) => {
+    setCurrentIndex(index);
     setIsOpen(true);
   };
 
   const nextMedia = () =>
-    setCurrentIndex((prev) => (prev + 1) % activeMedia.length);
+    setCurrentIndex(
+      (prev) => (prev + 1) % activeMedia.length
+    );
 
   const prevMedia = () =>
-    setCurrentIndex((prev) => (prev - 1 + activeMedia.length) % activeMedia.length);
+    setCurrentIndex(
+      (prev) =>
+        (prev - 1 + activeMedia.length) %
+        activeMedia.length
+    );
 
-  // -------------------------------------------------
-  // Extract YouTube ID
-  // -------------------------------------------------
   const getYouTubeID = (url: string) => {
     const match = url.match(
       /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
     );
+
     return match ? match[1] : null;
   };
 
   return (
     <div className="w-full">
-      {/* -------------------------------
-        Tabs
-      -------------------------------- */}
-      <div className="flex space-x-4 mb-8 justify-center flex-wrap">
+      {/* Tabs */}
+      <div className="flex justify-center flex-wrap gap-4 mb-8">
         {mediaTypes.map((tab) => (
           <button
             key={tab.id}
             onClick={() => {
               setActiveTab(tab.id);
-              setIsOpen(false);
               setCurrentIndex(0);
+              setIsOpen(false);
             }}
-            className={`px-6 py-2 rounded-full font-semibold transition-all duration-300 ${
+            className={`px-6 py-2 rounded-full font-semibold transition-all ${
               activeTab === tab.id
-                ? "bg-[#ab8c30] text-white shadow-lg"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                ? "bg-[#ab8c30] text-white"
+                : "bg-gray-100 text-gray-700"
             }`}
           >
             {tab.title}
@@ -118,58 +129,78 @@ export default function NewsMediaTabs({ mediaTypes = [] }: NewsMediaTabsProps) {
         ))}
       </div>
 
-      {/* -------------------------------
-        Media Grid
-      -------------------------------- */}
+      {/* Grid */}
       {activeMedia.length === 0 ? (
-        <div className="text-center text-gray-500 py-10">
-          No media available right now.
+        <div className="text-center py-10">
+          No media available
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {activeMedia.map((item, idx) => {
-            const isVideo = item.type === "video";
-            const youtubeId = isVideo ? getYouTubeID(item.url) : null;
-
-            const thumb = isVideo
-              ? youtubeId
-                ? `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`
-                : "/fallback-video-thumb.jpg"
-              : item.url || "/fallback-image.jpg";
+            const youtubeId = item.isYoutube
+              ? getYouTubeID(item.url)
+              : null;
 
             return (
               <div
                 key={idx}
                 onClick={() => openLightbox(idx)}
-                className="relative w-full aspect-video cursor-pointer overflow-hidden rounded-xl shadow-md hover:scale-[1.02] transition-transform duration-300"
+                className="relative overflow-hidden rounded-xl shadow-lg cursor-pointer aspect-video bg-black"
               >
-                <Image
-                  src={thumb}
-                  alt={item.title}
-                  width={600}
-                  height={400}
-                  className="object-cover w-full h-full"
-                  priority
-                  unoptimized
-                />
+                {/* YouTube */}
+                {item.isYoutube && youtubeId && (
+                  <>
+                    <Image
+                      src={`https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`}
+                      alt={item.title}
+                      fill
+                      className="object-cover"
+                      unoptimized
+                    />
 
-                {isVideo && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="bg-black/50 rounded-full p-3">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="white"
-                        viewBox="0 0 24 24"
-                        width="36"
-                        height="36"
-                      >
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="bg-black/50 rounded-full p-4">
+                        ▶
+                      </div>
                     </div>
-                  </div>
+                  </>
                 )}
 
-                <div className="absolute bottom-0 w-full bg-black/50 text-white text-sm p-2 text-center">
+                {/* Uploaded Video */}
+                {!item.isYoutube &&
+                  item.type === "video" && (
+                    <>
+                      <video
+                        className="w-full h-full object-cover"
+                        preload="metadata"
+                        muted
+                      >
+                        <source
+                          src={item.url}
+                          type="video/mp4"
+                        />
+                      </video>
+
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="bg-black/50 rounded-full p-4 text-white text-2xl">
+                          ▶
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                {/* Image */}
+                {item.type === "image" && (
+                  <Image
+                    src={item.url}
+                    alt={item.title}
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                )}
+
+                <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-center p-2">
                   {item.title}
                 </div>
               </div>
@@ -178,59 +209,56 @@ export default function NewsMediaTabs({ mediaTypes = [] }: NewsMediaTabsProps) {
         </div>
       )}
 
-      {/* -------------------------------
-        Lightbox
-      -------------------------------- */}
+      {/* Lightbox */}
       {isOpen && activeMedia[currentIndex] && (
         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-          {/* Close */}
           <button
-            className="absolute top-4 right-6 text-white text-3xl font-bold hover:text-gray-400"
             onClick={() => setIsOpen(false)}
+            className="absolute top-5 right-5 text-white text-4xl"
           >
-            &times;
+            ×
           </button>
 
-          {/* Prev / Next */}
           <button
-            className="absolute left-4 text-white text-3xl font-bold hover:text-gray-400"
             onClick={prevMedia}
+            className="absolute left-5 text-white text-4xl"
           >
-            &#8592;
-          </button>
-          <button
-            className="absolute right-4 text-white text-3xl font-bold hover:text-gray-400"
-            onClick={nextMedia}
-          >
-            &#8594;
+            ←
           </button>
 
-          {/* Content */}
-          <div className="max-w-5xl w-full max-h-[80vh] flex items-center justify-center">
-            {activeMedia[currentIndex].type === "image" ? (
+          <button
+            onClick={nextMedia}
+            className="absolute right-5 text-white text-4xl"
+          >
+            →
+          </button>
+
+          <div className="max-w-6xl w-full">
+            {activeMedia[currentIndex].type ===
+            "image" ? (
               <Image
                 src={activeMedia[currentIndex].url}
                 alt={activeMedia[currentIndex].title}
-                width={1200}
-                height={800}
-                className="object-contain"
-                priority
+                width={1400}
+                height={900}
+                className="w-full h-auto object-contain"
                 unoptimized
               />
-            ) : getYouTubeID(activeMedia[currentIndex].url) ? (
+            ) : activeMedia[currentIndex]
+                .isYoutube ? (
               <iframe
                 src={`https://www.youtube.com/embed/${getYouTubeID(
                   activeMedia[currentIndex].url
                 )}`}
-                title={activeMedia[currentIndex].title}
-                className="w-full h-[70vh] rounded-lg"
+                className="w-full h-[75vh]"
                 allowFullScreen
               />
             ) : (
               <video
                 src={activeMedia[currentIndex].url}
                 controls
-                className="w-full h-[70vh] rounded-lg object-contain"
+                autoPlay
+                className="w-full h-[75vh] object-contain"
               />
             )}
           </div>
