@@ -68,7 +68,7 @@ export default async function Footer() {
 
   return (
     <>
-      <CountryListSection />
+      {/* <CountryListSection /> */}
       <footer className="relative border-t border-border poppins overflow-hidden">
         {/* Main Footer Content */}
         <div className="w-auto relative mx-auto px-4 md:px-8 lg:px-12 py-16 overflow-hidden">
