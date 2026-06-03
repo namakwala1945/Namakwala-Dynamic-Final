@@ -50,10 +50,6 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: "/:country/:slug.html",
-        destination: "/blog/:slug",
-      },
-      {
         source: "/:slug.html",
         destination: "/blog/:slug",
       },
