@@ -1,5 +1,3 @@
-"use client";
-
 import PageBanner from "@/components/PageBanner";
 import { notFound } from "next/navigation";
 import Image from "next/image";

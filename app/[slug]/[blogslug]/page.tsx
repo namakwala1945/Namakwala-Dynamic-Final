@@ -14,11 +14,8 @@ async function getBlogData(slug: string) {
     const { data } = await res.json();
 
     return data?.[0];
-
   } catch (error) {
-
     console.error(error);
-
     return null;
   }
 }
@@ -31,7 +28,6 @@ export async function generateMetadata({
     blogslug: string;
   }>;
 }): Promise<Metadata> {
-
   const { blogslug } = await params;
 
   const cleanSlug = blogslug.replace(".html", "");
@@ -42,21 +38,15 @@ export async function generateMetadata({
     return {};
   }
 
-  const hreflang = getHreflang(
-    blog.country?.Slug || ""
-  );
+  const hreflang = getHreflang(blog.country?.Slug || "");
 
-  const url =
-    `https://www.namakwala.com/${blog.country?.Slug}/${blog.slug}.html`;
+  const url = `https://www.namakwala.com/${blog.country?.Slug}/${blog.slug}.html`;
 
   return {
     title: blog.title,
-
     description: blog.Excerpt || "",
-
     alternates: {
       canonical: url,
-
       languages: {
         [hreflang]: url,
       },
@@ -72,12 +62,9 @@ export default async function Page({
     blogslug: string;
   }>;
 }) {
-
   const { blogslug } = await params;
 
-  return (
-    <BlogDetailPage
-      slug={blogslug}
-    />
-  );
+  const cleanSlug = blogslug.replace(".html", "");
+
+  return <BlogDetailPage slug={cleanSlug} />;
 }
