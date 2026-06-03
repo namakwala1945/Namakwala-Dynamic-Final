@@ -1,9 +1,0 @@
-# *
-User-agent: *
-Allow: /
-
-# Host
-Host: https://www.namakwala.in
-
-# Sitemaps
-Sitemap: https://www.namakwala.in/sitemap.xml
