@@ -34,7 +34,9 @@ export async function generateMetadata({
 
   const { blogslug } = await params;
 
-  const blog = await getBlogData(blogslug);
+  const cleanSlug = blogslug.replace(".html", "");
+
+  const blog = await getBlogData(cleanSlug);
 
   if (!blog) {
     return {};
@@ -50,8 +52,7 @@ export async function generateMetadata({
   return {
     title: blog.title,
 
-    description:
-      blog.Excerpt || "",
+    description: blog.Excerpt || "",
 
     alternates: {
       canonical: url,
