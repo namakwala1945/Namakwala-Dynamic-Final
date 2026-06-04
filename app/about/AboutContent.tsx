@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import PageBanner from "@/components/PageBanner";
 import HashScroll from "@/components/HashScroll";
 import AboutSection from "./components/AboutSection";
-
+import "./about.css";
 interface Description {
   children: { text?: string }[];
 }
@@ -66,30 +66,30 @@ export default function AboutContent({ data }: AboutContentProps) {
         title: data.KeyMilestonesOptions?.title || "Key Milestones",
         content: milestoneData.map((item: any) => `${item.Year} – ${item.Key}`),
       },
-      "our-vision": {
-        slug: "our-vision",
-        title: commonSections[0]?.title || "Our Vision",
-        content: getDescriptionText(commonSections[0]?.description),
-        image: commonSections[0]?.image?.url
-          ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${commonSections[0].image.url}`
-          : undefined,
-      },
-      leadership: {
-        slug: "leadership",
-        title: commonSections[1]?.title || "Leadership",
-        content: getDescriptionText(commonSections[1]?.description),
-        image: commonSections[1]?.image?.url
-          ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${commonSections[1].image.url}`
-          : undefined,
-      },
-      "founder-legacy": {
-        slug: "founder-legacy",
-        title: commonSections[2]?.title || "Founder’s Legacy",
-        content: getDescriptionText(commonSections[2]?.description),
-        image: commonSections[2]?.image?.url
-          ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${commonSections[2].image.url}`
-          : undefined,
-      },
+    
+      ...Object.fromEntries(
+        commonSections
+          .sort(
+            (a, b) =>
+              parseInt(a.position || "1") -
+              parseInt(b.position || "1")
+          )
+          .map((item: any) => [
+            item.title
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "-"),
+            {
+              slug: item.title
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, "-"),
+              title: item.title,
+              content: getDescriptionText(item.description),
+              image: item.image?.url
+                ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${item.image.url}`
+                : undefined,
+            },
+          ])
+      ),
     },
   };
 
@@ -110,7 +110,25 @@ export default function AboutContent({ data }: AboutContentProps) {
       </Suspense>
 
       <div className="container mx-auto py-12 space-y-16">
-        {/* Our Journey Section */}
+
+        {/* About Namakwala Group */}
+        {knowAboutUsData
+          .filter(item => item.position === "1")
+          .map((item) => (
+            <AboutSection
+              key={item.id}
+              section={{
+                slug: `know-about-${item.id}`,
+                title: item.title,
+                content: getDescriptionText(item.description),
+                image: item.image?.url
+                  ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${item.image.url}`
+                  : undefined,
+              }}
+            />
+          ))}
+
+        {/* Our Legacy Since 1945 */}
         <AboutSection
           section={{
             slug: "our-journey",
@@ -126,8 +144,9 @@ export default function AboutContent({ data }: AboutContentProps) {
           }}
         />
 
-        {/* KnowAboutUs Sections (alternating layout) */}
+        {/* Remaining Know About Us */}
         {knowAboutUsData
+          .filter(item => item.position !== "1")
           .sort((a, b) => parseInt(a.position || "1") - parseInt(b.position || "1"))
           .map((item, idx) => (
             <AboutSection
@@ -144,12 +163,12 @@ export default function AboutContent({ data }: AboutContentProps) {
             />
           ))}
 
-        {/* Nested Sections */}
+        {/* Milestones + Common Sections */}
         <AboutSection
           section={{
             slug: "nested-sections",
-            title: "Nested Sections", // required
-            content: "",              // required
+            title: "Nested Sections",
+            content: "",
             sections: pageData.sections,
           }}
         />
