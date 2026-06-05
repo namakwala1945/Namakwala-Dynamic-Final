@@ -6,7 +6,13 @@ import HashScroll from "@/components/HashScroll";
 import AboutSection from "./components/AboutSection";
 import "./about.css";
 interface Description {
-  children: { text?: string }[];
+  type?: string;
+  children?: {
+    text?: string;
+    bold?: boolean;
+    italic?: boolean;
+    underline?: boolean;
+  }[];
 }
 
 interface KnowAboutUsItem {
@@ -52,7 +58,7 @@ export default function AboutContent({ data }: AboutContentProps) {
   const pageData: any = {
     slug: "our-journey",
     title: journeyData?.title || "Our Journey",
-    content: getDescriptionText(journeyData?.description) || "Namakwala's journey began in 1945 in Bhilwara.",
+    content: journeyData?.description || "Namakwala's journey began in 1945 in Bhilwara.",
     banner: {
       title: journeyData?.title,
       heading: journeyData?.title,
@@ -83,7 +89,7 @@ export default function AboutContent({ data }: AboutContentProps) {
                 .toLowerCase()
                 .replace(/[^a-z0-9]+/g, "-"),
               title: item.title,
-              content: getDescriptionText(item.description),
+              content: item.description,
               image: item.image?.url
                 ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${item.image.url}`
                 : undefined,
@@ -120,7 +126,7 @@ export default function AboutContent({ data }: AboutContentProps) {
               section={{
                 slug: `know-about-${item.id}`,
                 title: item.title,
-                content: getDescriptionText(item.description),
+                content: item.description,
                 image: item.image?.url
                   ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${item.image.url}`
                   : undefined,
@@ -133,7 +139,7 @@ export default function AboutContent({ data }: AboutContentProps) {
           section={{
             slug: "our-journey",
             title: journeyData?.title || "Our Journey",
-            content: getDescriptionText(journeyData?.description),
+            content: journeyData?.description,
             banner: {
               title: journeyData?.title,
               heading: journeyData?.title,
@@ -154,7 +160,7 @@ export default function AboutContent({ data }: AboutContentProps) {
               section={{
                 slug: `know-about-${item.id}`,
                 title: item.title,
-                content: getDescriptionText(item.description),
+                content: item.description,
                 image: item.image?.url
                   ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${item.image.url}`
                   : undefined,

@@ -3,10 +3,21 @@
 import Image from "next/image";
 import React from "react";
 
+interface RichTextNode {
+  type?: string;
+  level?: number;
+  children?: {
+    text?: string;
+    bold?: boolean;
+    italic?: boolean;
+    underline?: boolean;
+  }[];
+}
+
 interface NestedSection {
   slug: string;
   title: string;
-  content: string | string[];
+  content: any;
   image?: string;
 }
 
@@ -14,7 +25,7 @@ interface SectionProps {
   section: {
     slug: string;
     title: string;
-    content: string | string[];
+    content: any;
     banner?: {
       title?: string;
       heading?: string;
@@ -25,10 +36,107 @@ interface SectionProps {
     isReversed?: boolean; // For alternating layout
   };
 }
+const renderRichText = (content: any) => {
+  if (!Array.isArray(content)) {
+    return (
+      <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+        {content}
+      </p>
+    );
+  }
 
+  return content.map((block: any, index: number) => {
+    const text = block.children?.map((child: any) => child.text).join("");
+
+    switch (block.type) {
+      case "heading":
+        if (block.level === 1) {
+          return (
+            <h1
+              key={index}
+              className="text-4xl md:text-5xl font-bold mb-6 mt-6"
+            >
+              {text}
+            </h1>
+          );
+        }
+
+        if (block.level === 2) {
+          return (
+            <h2
+              key={index}
+              className="text-3xl md:text-4xl font-bold mb-5 mt-5"
+            >
+              {text}
+            </h2>
+          );
+        }
+
+        if (block.level === 3) {
+          return (
+            <h3
+              key={index}
+              className="text-2xl md:text-3xl font-semibold mb-4 mt-4"
+            >
+              {text}
+            </h3>
+          );
+        }
+
+        return (
+          <h4
+            key={index}
+            className="text-xl font-semibold mb-3 mt-3"
+          >
+            {text}
+          </h4>
+        );
+
+      case "paragraph":
+        return (
+          <p
+            key={index}
+            className="mb-4 text-gray-700 leading-8"
+          >
+            {block.children?.map((child: any, i: number) => {
+              let node: React.ReactNode = child.text;
+
+              if (child.bold) {
+                node = <strong>{node}</strong>;
+              }
+
+              if (child.italic) {
+                node = <em>{node}</em>;
+              }
+
+              if (child.underline) {
+                node = <u>{node}</u>;
+              }
+
+              return <React.Fragment key={i}>{node}</React.Fragment>;
+            })}
+          </p>
+        );
+
+      case "list":
+        return (
+          <ul
+            key={index}
+            className="list-disc pl-6 mb-4"
+          >
+            {block.children?.map((item: any, i: number) => (
+              <li key={i}>{item.text}</li>
+            ))}
+          </ul>
+        );
+
+      default:
+        return null;
+    }
+  });
+};
 export default function AboutSection({ section }: SectionProps) {
   const isReversed = section.isReversed || false;
-
   return (
     <section
       id={section.slug}
@@ -45,7 +153,9 @@ export default function AboutSection({ section }: SectionProps) {
             <h2 className="text-3xl sm:text-3xl md:text-4xl font-bold mb-4 text-gray-800 animate-slideUp playfair text-gradient leading-snug md:leading-[1.5]">
               {section.title}
             </h2>
-            <p className="text-gray-700 whitespace-pre-line">{section.content}</p>
+            <div className="rich-content">
+              {renderRichText(section.content)}
+            </div>
           </div>
 
           {/* Image */}
@@ -81,17 +191,9 @@ export default function AboutSection({ section }: SectionProps) {
                   {section.title}
                 </h2>
       
-                {Array.isArray(section.content) ? (
-                  <ul className="list-disc list-inside text-gray-700 space-y-2">
-                    {section.content.map((text, i) => (
-                      <li key={i}>{text}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-gray-700 whitespace-pre-line leading-relaxed">
-                    {section.content}
-                  </p>
-                )}
+                <div className="rich-content">
+                  {renderRichText(section.content)}
+                </div>
               </div>
       
               {/* Optional Image */}
@@ -171,9 +273,9 @@ export default function AboutSection({ section }: SectionProps) {
                       {sub.title}
                     </h4>
 
-                    <p className="text-gray-700 leading-relaxed flex-grow">
-                      {sub.content}
-                    </p>
+                    <div className="rich-content">
+                    {renderRichText(sub.content)}
+                    </div>
                   </div>
                 </div>
               ))}
