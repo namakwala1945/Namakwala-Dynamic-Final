@@ -118,24 +118,54 @@ const renderRichText = (content: any) => {
           </p>
         );
 
-      case "list":
-        return (
-          <ul
-            key={index}
-            className="list-disc pl-6 mb-4"
-          >
-            {block.children?.map((item: any, i: number) => (
-              <li key={i}>{item.text}</li>
-            ))}
-          </ul>
-        );
+        case "list":
+          const ListTag =
+            block.format === "ordered" ? "ol" : "ul";
 
-      default:
+          return (
+            <ListTag
+              key={index}
+              className={
+                block.format === "ordered"
+                  ? "list-decimal pl-6 mb-6 space-y-2"
+                  : "list-disc pl-6 mb-6 space-y-2"
+              }
+            >
+              {block.children?.map((item: any, i: number) => (
+                <li key={i}>
+                  {item.children?.map((child: any, j: number) => {
+                    let node: React.ReactNode = child.text;
+
+                    if (child.bold) {
+                      node = <strong>{node}</strong>;
+                    }
+
+                    if (child.italic) {
+                      node = <em>{node}</em>;
+                    }
+
+                    if (child.underline) {
+                      node = <u>{node}</u>;
+                    }
+
+                    return (
+                      <React.Fragment key={j}>
+                        {node}
+                      </React.Fragment>
+                    );
+                  })}
+                </li>
+              ))}
+            </ListTag>
+          );
+        
+        default:
         return null;
     }
   });
 };
 export default function AboutSection({ section }: SectionProps) {
+  console.log("CONTENT", section.content);
   const isReversed = section.isReversed || false;
   return (
     <section
