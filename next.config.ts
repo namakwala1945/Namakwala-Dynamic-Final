@@ -11,30 +11,40 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 60,
     deviceSizes: [320, 640, 768, 1024, 1200, 1600],
 
-    domains: ["images.unsplash.com", "img.youtube.com", "admin.namakwala.com"],
+    domains: [
+      "images.unsplash.com",
+      "img.youtube.com",
+      "admin.namakwala.com",
+      "localhost",
+    ],
 
     remotePatterns: [
-      { protocol: "https", hostname: "picsum.photos" },
-      { protocol: "https", hostname: "upload.wikimedia.org" },
-      { protocol: "https", hostname: "apeda.gov.in" },
+      {
+        protocol: "https",
+        hostname: "picsum.photos",
+      },
+
+      {
+        protocol: "https",
+        hostname: "upload.wikimedia.org",
+      },
+
+      {
+        protocol: "https",
+        hostname: "apeda.gov.in",
+      },
 
       {
         protocol: "http",
         hostname: "localhost",
         port: "1337",
-        pathname: "/uploads/**",
+        pathname: "/**",
       },
 
       {
         protocol: "https",
-        hostname: "admin.namakwala.com",
-        pathname: "/uploads/**",
-      },
-
-      {
-        protocol: "https",
-        hostname: "admin.namakwala.com",
-        pathname: "/optimized/**",
+        hostname: "uat-admin.namakwala.com",
+        pathname: "/**",
       },
     ],
   },
@@ -44,8 +54,13 @@ const nextConfig: NextConfig = {
     defaultLocale: "en",
   },
 
-  eslint: { ignoreDuringBuilds: true },
-  typescript: { ignoreBuildErrors: true },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
+  typescript: {
+    ignoreBuildErrors: true,
+  },
 
   async rewrites() {
     return [

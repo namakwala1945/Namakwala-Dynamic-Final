@@ -21,10 +21,6 @@ export default function ScrollImageSection() {
       try {
         const res = await fetch(
           `${STRAPI_URL}/api/scoll-zoom-sections?populate=*`,
-          {
-            cache: "force-cache",
-            next: { revalidate: 60 },
-          }
         );
 
         const json = await res.json();
