@@ -22,6 +22,75 @@ interface MenuItem {
 }
 
 export default function Header() {
+  console.log("HEADER RENDERED");
+  const [aboutPages, setAboutPages] = useState<any[]>([]);
+
+useEffect(() => {
+  console.log("====================================");
+  console.log("✅ useEffect Started");
+  console.log("ENV URL =", process.env.NEXT_PUBLIC_STRAPI_URL);
+  console.log("====================================");
+
+  async function loadAboutPages() {
+    console.log("🚀 loadAboutPages() Called");
+
+    try {
+      const apiUrl = `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/about-pages?fields[0]=Title&fields[1]=Slug`;
+
+      console.log("📡 Fetch URL:", apiUrl);
+      console.log("⏳ Starting Fetch...");
+
+      const res = await fetch(apiUrl, {
+        cache: "no-store",
+      });
+
+      console.log("✅ Fetch Completed");
+      console.log("Status:", res.status);
+      console.log("OK:", res.ok);
+
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("❌ Response Text:", text);
+        throw new Error(`Failed (${res.status})`);
+      }
+
+      console.log("⏳ Parsing JSON...");
+
+      const json = await res.json();
+
+      console.log("✅ JSON Received");
+      console.log(json);
+
+      const pages = (json.data || []).sort(
+        (a: any, b: any) =>
+          a.Title.localeCompare(b.Title, "en", {
+            numeric: true,
+            sensitivity: "base",
+          })
+      );
+
+      console.log("✅ Sorted Pages");
+      console.table(pages);
+
+      setAboutPages(pages);
+
+      console.log("✅ setAboutPages Executed");
+    } catch (err) {
+      console.error("❌ FETCH ERROR");
+      console.error(err);
+    }
+  }
+
+  loadAboutPages();
+}, []);
+
+useEffect(() => {
+  console.log("====================================");
+  console.log("📦 About Pages State Changed");
+  console.log(aboutPages);
+  console.log("Length:", aboutPages.length);
+  console.log("====================================");
+}, [aboutPages]);
   const [fixed, setFixed] = useState(false);
   const [active, setActive] = useState<number | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -78,23 +147,21 @@ export default function Header() {
   const handleLinkClick = () => setMobileOpen(false);
 
   // Alphabetical Sort Function
-  const sortAlphabetically = <
-    T extends { title?: string; name?: string }
-  >(
-    arr: T[] = []
+  const sortAlphabetically = <T extends Record<string, any>>(
+    arr: T[] = [],
+    key: keyof T = "title" as keyof T
   ) => {
     return [...arr].sort((a, b) => {
-      const first = (a.title || a.name || "").toLowerCase();
-
-      const second = (b.title || b.name || "").toLowerCase();
-
-      return first.localeCompare(second, undefined, {
+      const first = String(a[key] || "").trim().toLowerCase();
+      const second = String(b[key] || "").trim().toLowerCase();
+  
+      return first.localeCompare(second, "en", {
         numeric: true,
         sensitivity: "base",
       });
     });
   };
-
+  const sortedAboutPages = aboutPages;
   return (
     <header
       className={`z-50 transition-all duration-300 py-1 poppins
@@ -222,22 +289,46 @@ export default function Header() {
 
                 <ul className="space-y-2">
 
-                  {sortAlphabetically(
-                    section.categories
-                  ).map((cat) => (
+                  {section.slug?.toLowerCase() === "about" ? (
 
-                    <li key={cat.slug}>
+                    sortedAboutPages.map((page) => (
 
-                      <Link
-                        href={`/${section.slug}#${cat.slug}`}
-                        className="block text-sm capitalize"
-                        onClick={handleLinkClick}
-                      >
-                        {cat.title}
-                      </Link>
+                      <li key={page.id}>
 
-                    </li>
-                  ))}
+                        <Link
+                          href={`/about/${page.Slug}`}
+                          className="block text-sm capitalize hover:text-primary transition-colors"
+                          onClick={handleLinkClick}
+                        >
+                          {page.Title}
+                        </Link>
+
+                      </li>
+
+                    ))
+
+                  ) : (
+
+                    sortAlphabetically(
+                    section.categories ?? []
+                    ).map((cat) => (
+
+                      <li key={cat.slug}>
+
+                        <Link
+                          href={`/${section.slug}#${cat.slug}`}
+                          className="block text-sm capitalize hover:text-primary transition-colors"
+                          onClick={handleLinkClick}
+                        >
+                          {cat.title}
+                        </Link>
+
+                      </li>
+
+                    ))
+
+                  )}
+
                 </ul>
 
               </div>
@@ -340,9 +431,7 @@ export default function Header() {
 
                 <div className="pl-4 pt-2 space-y-2">
 
-                  {sortAlphabetically(
-                    item.content
-                  ).map((section, secIdx) => (
+                  {sortAlphabetically(item.content ?? []).map((section, secIdx) => (
 
                     <div key={`mob-section-${i}-${secIdx}`}>
 
@@ -356,8 +445,8 @@ export default function Header() {
                           {section.title}
                         </Link>
 
-                        {section.categories &&
-                          section.categories.length > 0 && (
+                        {(section.slug === "about" ||
+                          section.categories?.length) &&  (
 
                             <button
                               aria-label="Open submenu"
@@ -378,30 +467,49 @@ export default function Header() {
                           )}
                       </div>
 
-                      {section.categories &&
-                        mobileInnerOpen[
-                          `${i}-${secIdx}`
-                        ] && (
+                      {(section.slug === "about" ||
+                        section.categories?.length) &&
+                        mobileInnerOpen[`${i}-${secIdx}`] && (
 
                           <div className="pl-4 pt-1 space-y-1">
 
-                            {sortAlphabetically(
-                              section.categories
-                            ).map((cat) => (
+                            {section.slug === "about" ? (
 
-                              <Link
-                                key={`${i}-${secIdx}-${cat.slug}`}
-                                href={`/${section.slug}#${cat.slug}`}
-                                className="block text-sm capitalize"
-                                onClick={handleLinkClick}
-                              >
-                                {cat.title}
-                              </Link>
+                              sortedAboutPages.map((page) => (
 
-                            ))}
+                                <Link
+                                  key={page.id}
+                                  href={`/about/${page.Slug}`}
+                                  className="block text-sm capitalize"
+                                  onClick={handleLinkClick}
+                                >
+                                  {page.Title}
+                                </Link>
+
+                              ))
+
+                            ) : (
+
+                              sortAlphabetically(
+                              section.categories ?? []
+                              ).map((cat) => (
+
+                                <Link
+                                  key={`${i}-${secIdx}-${cat.slug}`}
+                                  href={`/${section.slug}#${cat.slug}`}
+                                  className="block text-sm capitalize"
+                                  onClick={handleLinkClick}
+                                >
+                                  {cat.title}
+                                </Link>
+
+                              ))
+
+                            )}
+
                           </div>
 
-                        )}
+                      )}
                     </div>
                   ))}
                 </div>

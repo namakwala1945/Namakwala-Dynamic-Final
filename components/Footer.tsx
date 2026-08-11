@@ -46,17 +46,32 @@ const iconMap: any = {
 
 // API Fetcher
 async function getSocialMedia() {
+  const url = `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/social-medias?populate=*`;
+
+  console.log("Fetching:", url);
+
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/social-medias?populate=*`, {
+    const res = await fetch(url, {
       cache: "no-store",
     });
 
-    if (!res.ok) throw new Error("API Error");
+    console.log("Status:", res.status);
+
+    if (!res.ok) {
+      const txt = await res.text();
+      console.log(txt);
+      return [];
+    }
 
     const json = await res.json();
+
     return json.data?.[0]?.SocialLink || [];
-  } catch (error) {
-    console.error("Social API failed:", error);
+  } catch (err: any) {
+    console.error("FULL ERROR");
+    console.error(err);
+    console.error(err.cause);
+    console.error(err.stack);
+
     return [];
   }
 }
