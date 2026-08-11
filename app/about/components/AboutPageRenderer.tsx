@@ -14,9 +14,12 @@ export default function AboutPageRenderer({
 }: {
   page: any;
 }) {
+
   console.log("PAGE DATA", page);
+  console.log("TimeLine Section :: PAGE DATA", JSON.stringify(page.TimelineSection));
 
   return (
+    
     <>
       <PageBanner
         title={
@@ -34,13 +37,8 @@ export default function AboutPageRenderer({
 
       <section className="bg-[#d2ab67] py-20">
 
-        <div className="max-w-7xl mx-auto bg-white shadow-xl">
-
+        
           <div className="p-8 md:p-14 lg:p-20">
-
-            <h1 className="text-5xl playfair font-bold mb-8">
-              {page.Title}
-            </h1>
 
             {page.Content?.length > 0 && (
               <div className="rich-content mb-20">
@@ -77,9 +75,8 @@ export default function AboutPageRenderer({
             )}
 
           </div>
-
-        </div>
-
+ß
+        
       </section>
     </>
   );

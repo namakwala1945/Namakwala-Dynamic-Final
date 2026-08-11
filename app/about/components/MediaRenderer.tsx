@@ -22,7 +22,7 @@ export default function MediaRenderer({
   media = [],
 }: Props) {
 
-  if (!media.length) return null;
+  if (!media?.length) return null;
 
   // -----------------
   // Single Media
@@ -62,7 +62,7 @@ export default function MediaRenderer({
 
     return (
 
-      <div className="relative overflow-hidden rounded-2xl aspect-[4/3] shadow-xl">
+      <div className="relative overflow-hidden aspect-[4/3] shadow-xl">
 
         <Image
           src={url}
