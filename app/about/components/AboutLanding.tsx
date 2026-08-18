@@ -50,7 +50,7 @@ export default function AboutLanding({
 
                   {/* Content */}
 
-                  <div className="p-8">
+                  <div className="p-6 sm:p-8">
 
                     <span className="inline-block rounded-full bg-[#0d1b4c] text-[#d2ab67] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] mb-4 shadow-md">
                       Our Story

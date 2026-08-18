@@ -26,15 +26,15 @@ export default function TeamSection({
 
   return (
 
-    <section className="py-24">
+    <section className="py-12 sm:py-16 md:py-24">
 
-      <div className="text-center mb-16">
+      <div className="text-center mb-10 sm:mb-16">
 
         <span className="inline-block rounded-full bg-[#0d1b4c] text-[#d2ab67] px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] mb-4 shadow-md">
           Our People
         </span>
 
-        <h2 className="text-5xl playfair font-bold">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl playfair font-bold">
 
           Leadership Team
 
@@ -42,7 +42,7 @@ export default function TeamSection({
 
       </div>
 
-      <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-10">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-10">
 
         {members.map((member) => {
 
@@ -67,7 +67,7 @@ export default function TeamSection({
 
               <div className="bg-[#f5efe0] border border-[#d2ab67]/40 rounded-2xl overflow-hidden shadow-xl">
 
-                <div className="relative h-[420px]">
+                <div className="relative h-[300px] sm:h-[360px] md:h-[420px]">
 
                   <Image
                     src={
@@ -84,7 +84,7 @@ export default function TeamSection({
 
                 </div>
 
-                <div className="p-8">
+                <div className="p-6 sm:p-8">
 
                   <h3 className="text-2xl font-bold playfair">
 

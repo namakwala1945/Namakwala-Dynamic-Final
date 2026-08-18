@@ -22,75 +22,37 @@ interface MenuItem {
 }
 
 export default function Header() {
-  console.log("HEADER RENDERED");
   const [aboutPages, setAboutPages] = useState<any[]>([]);
 
-useEffect(() => {
-  console.log("====================================");
-  console.log("✅ useEffect Started");
-  console.log("ENV URL =", process.env.NEXT_PUBLIC_STRAPI_URL);
-  console.log("====================================");
+  useEffect(() => {
+    async function loadAboutPages() {
+      try {
+        const apiUrl = `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/about-pages?fields[0]=Title&fields[1]=Slug`;
 
-  async function loadAboutPages() {
-    console.log("🚀 loadAboutPages() Called");
+        const res = await fetch(apiUrl, {
+          cache: "no-store",
+        });
 
-    try {
-      const apiUrl = `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/about-pages?fields[0]=Title&fields[1]=Slug`;
+        if (!res.ok) return;
 
-      console.log("📡 Fetch URL:", apiUrl);
-      console.log("⏳ Starting Fetch...");
+        const json = await res.json();
 
-      const res = await fetch(apiUrl, {
-        cache: "no-store",
-      });
+        const pages = (json.data || []).sort(
+          (a: any, b: any) =>
+            a.Title.localeCompare(b.Title, "en", {
+              numeric: true,
+              sensitivity: "base",
+            })
+        );
 
-      console.log("✅ Fetch Completed");
-      console.log("Status:", res.status);
-      console.log("OK:", res.ok);
-
-      if (!res.ok) {
-        const text = await res.text();
-        console.error("❌ Response Text:", text);
-        throw new Error(`Failed (${res.status})`);
+        setAboutPages(pages);
+      } catch {
+        // silently keep the previous/empty about-pages list
       }
-
-      console.log("⏳ Parsing JSON...");
-
-      const json = await res.json();
-
-      console.log("✅ JSON Received");
-      console.log(json);
-
-      const pages = (json.data || []).sort(
-        (a: any, b: any) =>
-          a.Title.localeCompare(b.Title, "en", {
-            numeric: true,
-            sensitivity: "base",
-          })
-      );
-
-      console.log("✅ Sorted Pages");
-      console.table(pages);
-
-      setAboutPages(pages);
-
-      console.log("✅ setAboutPages Executed");
-    } catch (err) {
-      console.error("❌ FETCH ERROR");
-      console.error(err);
     }
-  }
 
-  loadAboutPages();
-}, []);
-
-useEffect(() => {
-  console.log("====================================");
-  console.log("📦 About Pages State Changed");
-  console.log(aboutPages);
-  console.log("Length:", aboutPages.length);
-  console.log("====================================");
-}, [aboutPages]);
+    loadAboutPages();
+  }, []);
   const [fixed, setFixed] = useState(false);
   const [active, setActive] = useState<number | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -197,7 +159,7 @@ useEffect(() => {
 
         {/* Desktop nav */}
         <nav
-          className={`hidden md:flex absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 items-center gap-6 ${
+          className={`hidden md:flex absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 items-center gap-3 lg:gap-6 text-sm lg:text-base whitespace-nowrap ${
             fixed ? "text-black" : "text-white"
           }`}
           onMouseLeave={scheduleClose}
@@ -431,87 +393,125 @@ useEffect(() => {
 
                 <div className="pl-4 pt-2 space-y-2">
 
-                  {sortAlphabetically(item.content ?? []).map((section, secIdx) => (
+                  {(() => {
+                    const sections = sortAlphabetically(item.content ?? []);
 
-                    <div key={`mob-section-${i}-${secIdx}`}>
+                    // A megamenu with only one section (e.g. "About") has
+                    // nothing to disambiguate — skip the redundant nested
+                    // section header/toggle and show its links directly.
+                    if (sections.length === 1) {
+                      const section = sections[0];
 
-                      <div className="flex items-center justify-between">
-
-                        <Link
-                          href={`/${section.slug}`}
-                          className="block text-1xl uppercase mb-2"
-                          onClick={handleLinkClick}
-                        >
-                          {section.title}
-                        </Link>
-
-                        {(section.slug === "about" ||
-                          section.categories?.length) &&  (
-
-                            <button
-                              aria-label="Open submenu"
-                              className="p-1"
-                              onClick={() =>
-                                toggleMobileInner(i, secIdx)
-                              }
-                            >
-                              {mobileInnerOpen[
-                                `${i}-${secIdx}`
-                              ] ? (
-                                <FiChevronUp size={18} />
-                              ) : (
-                                <FiChevronDown size={18} />
-                              )}
-                            </button>
-
-                          )}
-                      </div>
-
-                      {(section.slug === "about" ||
-                        section.categories?.length) &&
-                        mobileInnerOpen[`${i}-${secIdx}`] && (
-
-                          <div className="pl-4 pt-1 space-y-1">
-
-                            {section.slug === "about" ? (
-
-                              sortedAboutPages.map((page) => (
-
-                                <Link
-                                  key={page.id}
-                                  href={`/about/${page.Slug}`}
-                                  className="block text-sm capitalize"
-                                  onClick={handleLinkClick}
-                                >
-                                  {page.Title}
-                                </Link>
-
-                              ))
-
-                            ) : (
-
-                              sortAlphabetically(
+                      const links =
+                        section.slug === "about"
+                          ? sortedAboutPages.map((page) => (
+                              <Link
+                                key={page.id}
+                                href={`/about/${page.Slug}`}
+                                className="block text-sm capitalize py-1"
+                                onClick={handleLinkClick}
+                              >
+                                {page.Title}
+                              </Link>
+                            ))
+                          : sortAlphabetically(
                               section.categories ?? []
-                              ).map((cat) => (
+                            ).map((cat) => (
+                              <Link
+                                key={cat.slug}
+                                href={`/${section.slug}#${cat.slug}`}
+                                className="block text-sm capitalize py-1"
+                                onClick={handleLinkClick}
+                              >
+                                {cat.title}
+                              </Link>
+                            ));
 
-                                <Link
-                                  key={`${i}-${secIdx}-${cat.slug}`}
-                                  href={`/${section.slug}#${cat.slug}`}
-                                  className="block text-sm capitalize"
-                                  onClick={handleLinkClick}
-                                >
-                                  {cat.title}
-                                </Link>
+                      return links;
+                    }
 
-                              ))
+                    return sections.map((section, secIdx) => (
+
+                      <div key={`mob-section-${i}-${secIdx}`}>
+
+                        <div className="flex items-center justify-between">
+
+                          <Link
+                            href={`/${section.slug}`}
+                            className="block text-1xl uppercase mb-2"
+                            onClick={handleLinkClick}
+                          >
+                            {section.title}
+                          </Link>
+
+                          {(section.slug === "about" ||
+                            section.categories?.length) &&  (
+
+                              <button
+                                aria-label="Open submenu"
+                                className="p-1"
+                                onClick={() =>
+                                  toggleMobileInner(i, secIdx)
+                                }
+                              >
+                                {mobileInnerOpen[
+                                  `${i}-${secIdx}`
+                                ] ? (
+                                  <FiChevronUp size={18} />
+                                ) : (
+                                  <FiChevronDown size={18} />
+                                )}
+                              </button>
 
                             )}
+                        </div>
 
-                          </div>
+                        {(section.slug === "about" ||
+                          section.categories?.length) &&
+                          mobileInnerOpen[`${i}-${secIdx}`] && (
 
-                      )}
-                    </div>
-                  ))}
+                            <div className="pl-4 pt-1 space-y-1">
+
+                              {section.slug === "about" ? (
+
+                                sortedAboutPages.map((page) => (
+
+                                  <Link
+                                    key={page.id}
+                                    href={`/about/${page.Slug}`}
+                                    className="block text-sm capitalize"
+                                    onClick={handleLinkClick}
+                                  >
+                                    {page.Title}
+                                  </Link>
+
+                                ))
+
+                              ) : (
+
+                                sortAlphabetically(
+                                section.categories ?? []
+                                ).map((cat) => (
+
+                                  <Link
+                                    key={`${i}-${secIdx}-${cat.slug}`}
+                                    href={`/${section.slug}#${cat.slug}`}
+                                    className="block text-sm capitalize"
+                                    onClick={handleLinkClick}
+                                  >
+                                    {cat.title}
+                                  </Link>
+
+                                ))
+
+                              )}
+
+                            </div>
+
+                        )}
+                      </div>
+                    ));
+                  })()}
                 </div>
 
               )}

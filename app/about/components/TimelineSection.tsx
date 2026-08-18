@@ -87,19 +87,39 @@ export default function TimelineSection({ items }: Props) {
     };
   }, [items]);
 
-  // Show the fixed left nav only while the timeline itself is in view.
+  // Show the fixed left nav only while the timeline actually overlaps the
+  // vertical center of the viewport — i.e. where the nav itself sits. A
+  // plain "is the wrapper touching the viewport at all" check falsely stays
+  // true on short pages, where the trailing edge of the last min-h-screen
+  // section can never scroll above the viewport's *middle* before the page
+  // runs out of content to scroll into.
   useEffect(() => {
     const wrapperEl = wrapperRef.current;
     if (!wrapperEl) return;
 
-    const visibilityObserver = new IntersectionObserver(
-      ([entry]) => setShowNav(entry.isIntersecting),
-      { threshold: 0 }
-    );
+    let ticking = false;
 
-    visibilityObserver.observe(wrapperEl);
+    const updateShowNav = () => {
+      ticking = false;
+      const rect = wrapperEl.getBoundingClientRect();
+      const viewportCenter = window.innerHeight / 2;
+      setShowNav(rect.top < viewportCenter && rect.bottom > viewportCenter);
+    };
 
-    return () => visibilityObserver.disconnect();
+    const onScrollOrResize = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(updateShowNav);
+    };
+
+    updateShowNav();
+    window.addEventListener("scroll", onScrollOrResize, { passive: true });
+    window.addEventListener("resize", onScrollOrResize);
+
+    return () => {
+      window.removeEventListener("scroll", onScrollOrResize);
+      window.removeEventListener("resize", onScrollOrResize);
+    };
   }, []);
 
   return (
@@ -199,7 +219,7 @@ export default function TimelineSection({ items }: Props) {
                   src="/namakwala-white-logo.png"
                   alt=""
                   aria-hidden="true"
-                  className={`absolute w-[560px] h-[560px] object-contain opacity-[0.04] pointer-events-none ${
+                  className={`absolute w-[320px] h-[320px] sm:w-[420px] sm:h-[420px] lg:w-[560px] lg:h-[560px] object-contain opacity-[0.04] pointer-events-none ${
                     isMediaLeft
                       ? "-right-24 top-1/2 -translate-y-1/2"
                       : "-left-24 top-1/2 -translate-y-1/2"
@@ -239,7 +259,7 @@ export default function TimelineSection({ items }: Props) {
                           {isVideo ? (
                             <video
                               src={mediaUrl}
-                              className="w-full h-[420px] object-cover"
+                              className="w-full h-[240px] sm:h-[320px] md:h-[380px] lg:h-[420px] object-cover"
                               autoPlay
                               muted
                               loop
@@ -249,7 +269,7 @@ export default function TimelineSection({ items }: Props) {
                             <img
                               src={mediaUrl}
                               alt={media?.alternativeText || item.Title}
-                              className="w-full h-[420px] object-cover"
+                              className="w-full h-[240px] sm:h-[320px] md:h-[380px] lg:h-[420px] object-cover"
                             />
                           )}
                         </div>
@@ -267,7 +287,7 @@ export default function TimelineSection({ items }: Props) {
                       {isVideo ? (
                         <video
                           src={mediaUrl}
-                          className="w-full h-[420px] object-cover"
+                          className="w-full h-[240px] sm:h-[320px] md:h-[380px] lg:h-[420px] object-cover"
                           autoPlay
                           muted
                           loop
@@ -277,7 +297,7 @@ export default function TimelineSection({ items }: Props) {
                         <img
                           src={mediaUrl}
                           alt={media?.alternativeText || item.Title}
-                          className="w-full h-[420px] object-cover"
+                          className="w-full h-[240px] sm:h-[320px] md:h-[380px] lg:h-[420px] object-cover"
                         />
                       )}
                     </div>
@@ -304,7 +324,7 @@ export default function TimelineSection({ items }: Props) {
                         ? "text-[#d2ab67] drop-shadow-[0_0_35px_rgba(210,171,103,0.35)]"
                         : "text-[#1a2b5c]"
                     }`}
-                    style={{ fontSize: "clamp(64px, 9vw, 140px)" }}
+                    style={{ fontSize: "clamp(52px, 16vw, 140px)" }}
                   >
                     {item.Year}
                   </h3>
