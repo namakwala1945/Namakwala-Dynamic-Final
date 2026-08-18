@@ -15,11 +15,13 @@ export default function AboutPageRenderer({
   page: any;
 }) {
 
-  console.log("PAGE DATA", page);
-  console.log("TimeLine Section :: PAGE DATA", JSON.stringify(page.TimelineSection));
+  const hasLeadingContent =
+    page.Content?.length > 0 || page.CommonSection?.length > 0;
+  const hasTrailingContent =
+    page.MilestoneSection?.KeyMilestonesOptions?.length > 0 ||
+    page.TeamSection?.length > 0;
 
   return (
-    
     <>
       <PageBanner
         title={
@@ -31,17 +33,15 @@ export default function AboutPageRenderer({
             ? getStrapiMedia(
                 page.PageBanner.image.url
               )
-            : "/images/about-banner.webp"
+            : "/optimized/placeholder-large.webp"
         }
       />
 
-      <section className="bg-[#d2ab67] py-20">
-
-        
-          <div className="p-8 md:p-14 lg:p-20">
-
+      {hasLeadingContent && (
+        <section className="bg-[#d2ab67] py-20 px-4 md:px-8 lg:px-12">
+          <div className="max-w-7xl mx-auto">
             {page.Content?.length > 0 && (
-              <div className="rich-content mb-20">
+              <div className="rich-content max-w-3xl mx-auto text-center mb-20">
                 <ContentRenderer
                   content={page.Content}
                 />
@@ -53,14 +53,20 @@ export default function AboutPageRenderer({
                 sections={page.CommonSection}
               />
             )}
+          </div>
+        </section>
+      )}
 
-            {page.TimelineSection?.length > 0 && (
-              <TimelineSection
-                items={page.TimelineSection}
-              />
-            )}
+      {page.TimelineSection?.length > 0 && (
+        <TimelineSection
+          items={page.TimelineSection}
+        />
+      )}
 
-            {page.MilestoneSection && (
+      {hasTrailingContent && (
+        <section className="bg-[#d2ab67] py-20 px-4 md:px-8 lg:px-12">
+          <div className="max-w-7xl mx-auto">
+            {page.MilestoneSection?.KeyMilestonesOptions?.length > 0 && (
               <MilestoneSection
                 milestone={
                   page.MilestoneSection
@@ -73,11 +79,9 @@ export default function AboutPageRenderer({
                 members={page.TeamSection}
               />
             )}
-
           </div>
-ß
-        
-      </section>
+        </section>
+      )}
     </>
   );
 }

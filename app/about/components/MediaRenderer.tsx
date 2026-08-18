@@ -62,7 +62,7 @@ export default function MediaRenderer({
 
     return (
 
-      <div className="relative overflow-hidden aspect-[4/3] shadow-xl">
+      <div className="relative overflow-hidden w-full h-full min-h-[320px] rounded-2xl shadow-xl">
 
         <Image
           src={url}
@@ -87,6 +87,7 @@ export default function MediaRenderer({
   return (
 
     <Swiper
+      className="h-full min-h-[320px]"
       modules={[
         Navigation,
         Pagination,
@@ -111,7 +112,7 @@ export default function MediaRenderer({
 
         return (
 
-          <SwiperSlide key={item.id}>
+          <SwiperSlide key={item.id} className="h-full">
 
             {item.mime?.startsWith(
               "video"
@@ -119,7 +120,7 @@ export default function MediaRenderer({
 
               <video
                 controls
-                className="w-full rounded-2xl"
+                className="w-full h-full object-cover rounded-2xl"
               >
 
                 <source
@@ -131,7 +132,7 @@ export default function MediaRenderer({
 
             ) : (
 
-              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden">
+              <div className="relative w-full h-full rounded-2xl overflow-hidden">
 
                 <Image
                   src={url}

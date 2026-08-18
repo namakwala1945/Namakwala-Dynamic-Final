@@ -18,26 +18,19 @@ async function getAboutPages() {
 
   const url = `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/about-pages?${query}`;
 
-  console.log("Fetching:", url);
-
   try {
     const res = await fetch(url, {
       cache: "no-store",
     });
 
-    console.log("STATUS:", res.status);
-
-    const text = await res.text();
-
-    console.log("BODY:", text);
-
     if (!res.ok) {
       return [];
     }
 
-    return JSON.parse(text).data ?? [];
-  } catch (err) {
-    console.error("ACTUAL FETCH ERROR:", err);
+    const json = await res.json();
+
+    return json.data ?? [];
+  } catch {
     return [];
   }
 }

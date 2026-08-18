@@ -1,12 +1,22 @@
 "use client";
 
 import Image from "next/image";
+import { Facebook, Twitter, Instagram, Linkedin, Youtube, Globe } from "lucide-react";
 import ContentRenderer from "@/components/ContentRenderer";
 import { getStrapiMedia } from "@/lib/media";
+import GoldCorners from "./GoldCorners";
 
 interface Props {
   members: any[];
 }
+
+const socialIconMap: Record<string, typeof Globe> = {
+  facebook: Facebook,
+  twitter: Twitter,
+  instagram: Instagram,
+  linkedin: Linkedin,
+  youtube: Youtube,
+};
 
 export default function TeamSection({
   members,
@@ -20,6 +30,10 @@ export default function TeamSection({
 
       <div className="text-center mb-16">
 
+        <span className="inline-block rounded-full bg-[#0d1b4c] text-[#d2ab67] px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] mb-4 shadow-md">
+          Our People
+        </span>
+
         <h2 className="text-5xl playfair font-bold">
 
           Leadership Team
@@ -30,57 +44,92 @@ export default function TeamSection({
 
       <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-10">
 
-        {members.map((member) => (
+        {members.map((member) => {
 
-          <div
-            key={member.id}
-            className="bg-white rounded-xl overflow-hidden shadow-xl hover:-translate-y-2 transition"
-          >
+          const SocialIcon = member.SocialMedia?.SocialName
+            ? socialIconMap[member.SocialMedia.SocialName.toLowerCase()] ?? Globe
+            : null;
 
-            <div className="relative h-[420px]">
+          const socialHref = member.SocialMedia?.SocialLink
+            ? member.SocialMedia.SocialLink.startsWith("http")
+              ? member.SocialMedia.SocialLink
+              : `https://${member.SocialMedia.SocialLink}`
+            : null;
 
-              <Image
-                src={
-                  member.Image?.length
-                    ? getStrapiMedia(
-                        member.Image[0].url
-                      )
-                    : "/images/team-placeholder.webp"
-                }
-                alt={member.Name}
-                fill
-                className="object-cover"
-              />
+          return (
 
-            </div>
+            <div
+              key={member.id}
+              className="relative transition-all duration-300 hover:-translate-y-2"
+            >
 
-            <div className="p-8">
+              <GoldCorners />
 
-              <h3 className="text-2xl font-bold">
+              <div className="bg-[#f5efe0] border border-[#d2ab67]/40 rounded-2xl overflow-hidden shadow-xl">
 
-                {member.Name}
+                <div className="relative h-[420px]">
 
-              </h3>
+                  <Image
+                    src={
+                      member.Image?.length
+                        ? getStrapiMedia(
+                            member.Image[0].url
+                          )
+                        : "/optimized/placeholder-large.webp"
+                    }
+                    alt={member.Name}
+                    fill
+                    className="object-cover"
+                  />
 
-              <p className="text-[#d2ab67] font-semibold my-4">
+                </div>
 
-                {member.Designation}
+                <div className="p-8">
 
-              </p>
+                  <h3 className="text-2xl font-bold playfair">
 
-              <div className="rich-content">
+                    {member.Name}
 
-                <ContentRenderer
-                  content={member.AboutPerson}
-                />
+                  </h3>
+
+                  <div className="flex items-center justify-between my-4">
+
+                    <p className="text-[#8a6a2f] font-semibold">
+
+                      {member.Designation}
+
+                    </p>
+
+                    {SocialIcon && socialHref && (
+                      <a
+                        href={socialHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={member.SocialMedia.SocialName}
+                      >
+                        <SocialIcon className="w-5 h-5 text-gray-500 hover:text-[#d2ab67] transition-colors" />
+                      </a>
+                    )}
+
+                  </div>
+
+                  <div className="rich-content">
+
+                    <ContentRenderer
+                      content={member.AboutPerson}
+                    />
+
+                  </div>
+
+                </div>
 
               </div>
 
             </div>
 
-          </div>
+          );
 
-        ))}
+        })}
 
       </div>
 
