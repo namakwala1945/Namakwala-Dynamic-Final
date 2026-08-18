@@ -3,8 +3,8 @@
 import { Suspense } from "react";
 import PageBanner from "@/components/PageBanner";
 import HashScroll from "@/components/HashScroll";
-import AboutSection from "./components/AboutSection";
-import "./about.css";
+import AboutSection from "./components/AboutSection-NoUse";
+
 interface Description {
   type?: string;
   children?: {

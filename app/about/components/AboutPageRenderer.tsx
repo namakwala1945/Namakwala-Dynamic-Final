@@ -75,9 +75,7 @@ export default function AboutPageRenderer({
             )}
 
           </div>
-ß
-        
-      </section>
+       </section>
     </>
   );
 }
