@@ -46,7 +46,6 @@ export default function CommonSection({ sections }: Props) {
                   min-h-[320px]
                   overflow-hidden
                   shadow-2xl
-                  rounded-2xl
                   border-2 border-[#d2ab67]/30
                   transition-all
                   duration-500
@@ -89,7 +88,6 @@ export default function CommonSection({ sections }: Props) {
                   border border-[#d2ab67]/40
                   p-6 md:p-10 lg:p-12
                   shadow-2xl
-                  rounded-2xl
                   transition-all
                   duration-500
                   hover:scale-[1.02]

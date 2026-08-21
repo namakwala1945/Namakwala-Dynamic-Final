@@ -46,7 +46,7 @@ export default function MediaRenderer({
           muted
           loop
           playsInline
-          className="w-full rounded-2xl shadow-xl"
+          className="w-full  shadow-xl"
         >
 
           <source
@@ -62,7 +62,7 @@ export default function MediaRenderer({
 
     return (
 
-      <div className="relative overflow-hidden w-full h-full min-h-[320px] rounded-2xl shadow-xl">
+      <div className="relative overflow-hidden w-full h-full min-h-[320px]  shadow-xl">
 
         <Image
           src={url}
@@ -120,7 +120,7 @@ export default function MediaRenderer({
 
               <video
                 controls
-                className="w-full h-full object-cover rounded-2xl"
+                className="w-full h-full object-cover "
               >
 
                 <source
@@ -132,7 +132,7 @@ export default function MediaRenderer({
 
             ) : (
 
-              <div className="relative w-full h-full rounded-2xl overflow-hidden">
+              <div className="relative w-full h-full  overflow-hidden">
 
                 <Image
                   src={url}

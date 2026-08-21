@@ -32,7 +32,7 @@ export default function AboutLanding({
 
                 <GoldCorners />
 
-                <div className="overflow-hidden rounded-2xl bg-[#f5efe0] border border-[#d2ab67]/40 shadow-lg group-hover:shadow-2xl transition-shadow duration-500">
+                <div className="overflow-hidden  bg-[#f5efe0] border border-[#d2ab67]/40 shadow-lg group-hover:shadow-2xl transition-shadow duration-500">
 
                   {/* Image */}
 

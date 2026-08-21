@@ -158,7 +158,7 @@ export default function TimelineSection({ items }: Props) {
                   </span>
 
                   <span
-                    className={`ml-3 rounded-full px-4 py-1.5 text-sm font-semibold whitespace-nowrap transition-all duration-300 ${
+                    className={`ml-3  px-4 py-1.5 text-sm font-semibold whitespace-nowrap transition-all duration-300 ${
                       isActive
                         ? "bg-[#0d1b4c] text-[#d2ab67] opacity-100"
                         : "text-[#0d1b4c]/40 opacity-0 -translate-x-2 pointer-events-none"
@@ -190,7 +190,7 @@ export default function TimelineSection({ items }: Props) {
             ref={(el) => {
               refs.current[index] = el;
             }}
-            className={`relative w-full min-h-screen flex items-center overflow-hidden px-6 md:px-16 lg:px-24 ${
+            className={`relative w-full min-h-screen flex items-center overflow-hidden py-10 md:py-16 lg:py-24 px-10 md:px-16 lg:px-24 ${
               isDark ? "bg-[#0d1b4c]" : "bg-[#f5efe0]"
             }`}
           >
@@ -219,9 +219,9 @@ export default function TimelineSection({ items }: Props) {
                   src="/namakwala-white-logo.png"
                   alt=""
                   aria-hidden="true"
-                  className={`absolute w-[320px] h-[320px] sm:w-[420px] sm:h-[420px] lg:w-[560px] lg:h-[560px] object-contain opacity-[0.04] pointer-events-none ${
+                  className={`absolute w-[280px] h-[280px] sm:w-[350px] sm:h-[350px] lg:w-[380px] lg:h-[380px] object-contain opacity-[0.04] pointer-events-none ${
                     isMediaLeft
-                      ? "-right-24 top-1/2 -translate-y-1/2"
+                      ? "-right-0 top-1/2 -translate-y-1/2"
                       : "-left-24 top-1/2 -translate-y-1/2"
                   }`}
                 />
@@ -248,14 +248,14 @@ export default function TimelineSection({ items }: Props) {
 
                     {/* Gilded double-mat frame: gold foil edge + navy mat + image */}
                     <div
-                      className="p-2 rounded-xl bg-gradient-to-br from-[#f3e0ae] via-[#d2ab67] to-[#7a5c2a]"
+                      className="p-2 bg-gradient-to-br from-[#f3e0ae] via-[#d2ab67] to-[#7a5c2a]"
                       style={{
                         boxShadow:
                           "0 25px 60px -15px rgba(0,0,0,0.7), 0 0 90px -20px rgba(210,171,103,0.45)",
                       }}
                     >
-                      <div className="p-2 rounded-lg bg-[#0a1638]">
-                        <div className="rounded-md overflow-hidden">
+                      <div className="p-2 bg-[#0a1638]">
+                        <div className="overflow-hidden">
                           {isVideo ? (
                             <video
                               src={mediaUrl}
@@ -277,7 +277,7 @@ export default function TimelineSection({ items }: Props) {
                     </div>
                   </div>
                 ) : (
-                  <div className="relative bg-white p-4 shadow-2xl rounded-md rotate-1">
+                  <div className="relative bg-white p-4 shadow-2xl rotate-1">
                     <span className="absolute -top-2.5 -left-2.5 w-7 h-7 border-t-2 border-l-2 border-[#d2ab67] z-10" />
                     <span className="absolute -top-2.5 -right-2.5 w-7 h-7 border-t-2 border-r-2 border-[#d2ab67] z-10" />
                     <span className="absolute -bottom-2.5 -left-2.5 w-7 h-7 border-b-2 border-l-2 border-[#d2ab67] z-10" />

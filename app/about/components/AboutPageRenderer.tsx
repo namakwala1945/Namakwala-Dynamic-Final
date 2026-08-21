@@ -38,7 +38,7 @@ export default function AboutPageRenderer({
       />
 
       {hasLeadingContent && (
-        <section className="bg-[#d2ab67] py-12 sm:py-16 md:py-20 px-4 md:px-8 lg:px-12">
+        <section className="bg-[#d2ab67] py-12 sm:py-16 md:py-20 px-4 md:px-8 lg:px-12 about-section">
           <div className="max-w-7xl mx-auto">
             {page.Content?.length > 0 && (
               <div className="rich-content max-w-3xl mx-auto text-center mb-10 sm:mb-14 md:mb-20">

@@ -39,7 +39,14 @@
 .playfair{
   font-family: var(--font-playfair);
 }
-
+.about-section h1, .about-section h2, .about-section h3, .about-section h4 
+{
+  font-family: var(--font-playfair);
+  font-size: 22px;
+  background: var(--gradient-primary);
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 /* Custom Theme Variables */
 @layer base {
   :root {
