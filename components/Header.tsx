@@ -241,13 +241,15 @@ export default function Header() {
                 className="min-w-[220px] text-center"
               >
 
-                <Link
-                  href={`/${section.slug}`}
-                  className="block text-1xl uppercase mb-4 font-bold"
-                  onClick={handleLinkClick}
-                >
-                  {section.title}
-                </Link>
+                {section.slug?.toLowerCase() !== "about" && (
+                  <Link
+                    href={`/${section.slug}`}
+                    className="block text-1xl uppercase mb-4 font-bold"
+                    onClick={handleLinkClick}
+                  >
+                    {section.title}
+                  </Link>
+                )}
 
                 <ul className="space-y-2">
 
